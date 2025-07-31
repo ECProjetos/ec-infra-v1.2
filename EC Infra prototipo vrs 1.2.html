@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EC Infra - Dashboard Executivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-left: 4px solid #3b82f6;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-operational { background-color: #10b981; }
+        .status-warning { background-color: #f59e0b; }
+        .status-critical { background-color: #ef4444; }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 0;
+        }
+        .nav-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: translateX(4px);
+        }
+        .nav-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .nav-item.active:hover {
+            background-color: #2563eb;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .inteligencia-tab {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .inteligencia-tab:hover {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+        .inteligencia-tab.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-anchor text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900">EC Infra</h1>
+                            <p class="text-xs text-gray-500">Dashboard Executivo</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <div class="text-right">
+                        <div class="flex items-center space-x-4 text-sm text-gray-600">
+                            <span>📅 15 de Janeiro, 2024</span>
+                            <span>⏰ Última atualização: 14:30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-bell text-lg"></i>
+                        </button>
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                            <span class="text-white text-sm font-medium">AD</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <nav class="mt-8 px-4">
+                <div class="space-y-2">
+                    <a href="#" onclick="showSection('dashboard')" class="nav-item active flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-tachometer-alt mr-3 text-lg"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" onclick="showSection('operacoes')" class="nav-item flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-ship mr-3 text-lg"></i>
+                        Operações
+                    </a>
+                    <a href="#" onclick="showSection('financeiro')" class="nav-item flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-chart-line mr-3 text-lg"></i>
+                        Financeiro
+                    </a>
+                    <a href="#" onclick="showSection('estrategica')" class="nav-item flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-chess mr-3 text-lg"></i>
+                        Gestão Estratégica
+                    </a>
+                    <a href="#" onclick="showSection('inteligencia')" class="nav-item flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-brain mr-3 text-lg"></i>
+                        Inteligência de Mercado
+                    </a>
+                    <a href="#" onclick="showSection('sustentabilidade')" class="nav-item flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-leaf mr-3 text-lg"></i>
+                        Sustentabilidade
+                    </a>
+                    <a href="#" onclick="showSection('rh')" class="nav-item flex items-center px-4 py-3 text-sm font-medium text-gray-700">
+                        <i class="fas fa-users mr-3 text-lg"></i>
+                        Gestão da Infraestrutura
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="section-content">
+                <div class="p-8">
+                    <!-- KPIs Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Movimentação Total -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Movimentação Total</p>
+                                    <p class="text-2xl font-bold text-gray-900">1.2M ton</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-ship text-blue-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-green-600 text-sm font-medium">↗ +8.5%</span>
+                                <span class="text-gray-500 text-sm ml-2">vs mês anterior</span>
+                            </div>
+                        </div>
+
+                        <!-- Receita -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Receita</p>
+                                    <p class="text-2xl font-bold text-gray-900">R$ 45.2M</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-green-600 text-sm font-medium">↗ +12.3%</span>
+                                <span class="text-gray-500 text-sm ml-2">vs mês anterior</span>
+                            </div>
+                        </div>
+
+                        <!-- Navios Atendidos -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Navios Atendidos</p>
+                                    <p class="text-2xl font-bold text-gray-900">47</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-anchor text-purple-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-green-600 text-sm font-medium">↗ +6</span>
+                                <span class="text-gray-500 text-sm ml-2">vs mês anterior</span>
+                            </div>
+                        </div>
+
+                        <!-- Eficiência Operacional -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Eficiência</p>
+                                    <p class="text-2xl font-bold text-gray-900">94.2%</p>
+                                </div>
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-gauge-high text-orange-600 text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-red-600 text-sm font-medium">↘ -1.2%</span>
+                                <span class="text-gray-500 text-sm ml-2">vs mês anterior</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Movimentação Mensal -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Movimentação Mensal (Toneladas)</h3>
+                            <div class="chart-container">
+                                <canvas id="movimentacaoChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Receita por Tipo de Carga -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Receita por Tipo de Carga</h3>
+                            <div class="chart-container">
+                                <canvas id="receitaChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Operacional -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Status dos Equipamentos -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Status dos Equipamentos</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="status-indicator status-operational"></span>
+                                        <span class="text-sm text-gray-700">Guindastes</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-green-600">Operacional</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="status-indicator status-warning"></span>
+                                        <span class="text-sm text-gray-700">Esteiras</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-yellow-600">Manutenção</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="status-indicator status-operational"></span>
+                                        <span class="text-sm text-gray-700">Silos</span>
+                                    </div>
+                                    <span class="text-sm font-medium text-green-600">Operacional</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Próximos Navios -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Próximos Navios</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">MV Atlantic Star</p>
+                                        <p class="text-xs text-gray-500">Soja - 45.000 ton</p>
+                                    </div>
+                                    <span class="text-xs text-blue-600 font-medium">16:30</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">MV Ocean Pride</p>
+                                        <p class="text-xs text-gray-500">Milho - 32.000 ton</p>
+                                    </div>
+                                    <span class="text-xs text-blue-600 font-medium">18:45</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">MV Grain Master</p>
+                                        <p class="text-xs text-gray-500">Soja - 38.500 ton</p>
+                                    </div>
+                                    <span class="text-xs text-blue-600 font-medium">Amanhã 08:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alertas -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Alertas</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                                    <div>
+                                        <p class="text-sm text-gray-900">Manutenção programada</p>
+                                        <p class="text-xs text-gray-500">Esteira 2 - Amanhã 06:00</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                    <div>
+                                        <p class="text-sm text-gray-900">Previsão meteorológica</p>
+                                        <p class="text-xs text-gray-500">Chuva moderada - 14:00-18:00</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                                    <div>
+                                        <p class="text-sm text-gray-900">Meta mensal</p>
+                                        <p class="text-xs text-gray-500">87% concluída</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operações Section -->
+            <div id="operacoes-section" class="section-content hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8">Operações Portuárias</h2>
+                    
+                    <!-- Operações em Tempo Real -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Operações em Andamento</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-ship text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-900">MV Atlantic Star</h4>
+                                            <p class="text-sm text-gray-600">Berço 1 • Carregamento de Soja</p>
+                                            <p class="text-xs text-blue-600">Iniciado: 08:30 • Previsão: 16:30</p>
+                                            <div class="flex items-center space-x-4 mt-1">
+                                                <p class="text-xs text-gray-600">Prancha: <span class="font-medium text-blue-600">1.850 t/h</span></p>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Operando</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-bold text-blue-600">32.4k/45k ton</p>
+                                        <div class="w-32 bg-gray-200 rounded-full h-2 mt-2">
+                                            <div class="bg-blue-600 h-2 rounded-full" style="width: 72%"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">72% concluído</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-ship text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-900">MV Grain Express</h4>
+                                            <p class="text-sm text-gray-600">Berço 2 • Carregamento de Milho</p>
+                                            <p class="text-xs text-green-600">Iniciado: 12:15 • Previsão: 20:00</p>
+                                            <div class="flex items-center space-x-4 mt-1">
+                                                <p class="text-xs text-gray-600">Prancha: <span class="font-medium text-green-600">1.620 t/h</span></p>
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Interrompido</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-bold text-green-600">18.7k/38k ton</p>
+                                        <div class="w-32 bg-gray-200 rounded-full h-2 mt-2">
+                                            <div class="bg-green-600 h-2 rounded-full" style="width: 49%"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">49% concluído</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Capacidade de Armazenagem</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Soja</span>
+                                        <span class="text-sm text-gray-600">85%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-yellow-500 h-3 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">127.5k/150k ton</p>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Milho</span>
+                                        <span class="text-sm text-gray-600">62%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-orange-500 h-3 rounded-full" style="width: 62%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">74.4k/120k ton</p>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Açúcar</span>
+                                        <span class="text-sm text-gray-600">34%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-500 h-3 rounded-full" style="width: 34%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">27.2k/80k ton</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila de Navios -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Fila de Navios - Próximas 48h</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-200">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Navio</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Tipo de Carga</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Quantidade</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">ETA</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Berço</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-3 px-4 font-medium">MV Ocean Pride</td>
+                                        <td class="py-3 px-4">Milho</td>
+                                        <td class="py-3 px-4">32.000 ton</td>
+                                        <td class="py-3 px-4">Hoje 18:45</td>
+                                        <td class="py-3 px-4">Berço 1</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Aguardando</span></td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-3 px-4 font-medium">MV Grain Master</td>
+                                        <td class="py-3 px-4">Soja</td>
+                                        <td class="py-3 px-4">38.500 ton</td>
+                                        <td class="py-3 px-4">Amanhã 08:00</td>
+                                        <td class="py-3 px-4">Berço 2</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Programado</span></td>
+                                    </tr>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="py-3 px-4 font-medium">MV Cargo Star</td>
+                                        <td class="py-3 px-4">Açúcar</td>
+                                        <td class="py-3 px-4">25.000 ton</td>
+                                        <td class="py-3 px-4">Amanhã 14:30</td>
+                                        <td class="py-3 px-4">Berço 1</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Confirmando</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Métricas Operacionais -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Tempo Médio de Operação</h4>
+                                <i class="fas fa-clock text-blue-600"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Média anual por carga vs meta</p>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Soja:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-green-600">6.8h</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 7.2h)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Milho:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-green-600">7.4h</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 7.8h)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Açúcar:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-red-600">8.1h</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 8.0h)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-green-600 mt-2">↗ Melhorou 12min vs mês anterior</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Taxa de Carregamento</h4>
+                                <i class="fas fa-tachometer-alt text-green-600"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Média anual por carga vs meta</p>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Soja:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-green-600">1.920 t/h</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 1.800 t/h)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Milho:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-green-600">1.780 t/h</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 1.650 t/h)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Açúcar:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-red-600">1.650 t/h</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 1.700 t/h)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-green-600 mt-2">↗ +5.2% média geral vs meta</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Taxa de Ocupação</h4>
+                                <i class="fas fa-check-circle text-purple-600"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Média anual por berço vs meta</p>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Berço 1:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-green-600">96.8%</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 95.0%)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Berço 2:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-red-600">91.6%</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 95.0%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-yellow-600 mt-2">↗ Berço 1 acima da meta, Berço 2 abaixo</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Total Movimentado</h4>
+                                <i class="fas fa-chart-bar text-orange-600"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Acumulado anual por carga vs meta</p>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Soja:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-green-600">742k ton</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 720k ton)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Milho:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-red-600">356k ton</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 380k ton)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Açúcar:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-red-600">98k ton</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 110k ton)</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center border-t pt-2 mt-2">
+                                    <span class="text-xs text-gray-700 font-medium">Total:</span>
+                                    <div class="text-right">
+                                        <span class="text-sm font-bold text-yellow-600">1.196k ton</span>
+                                        <span class="text-xs text-gray-500 ml-1">(meta: 1.210k ton)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-yellow-600 mt-2">↗ +8.5% vs 2023, -1.2% vs meta anual</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financeiro Section -->
+            <div id="financeiro-section" class="section-content hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8">Gestão Financeira</h2>
+                    
+                    <!-- KPIs Financeiros -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Receita Mensal</h4>
+                                <i class="fas fa-dollar-sign text-green-600"></i>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">Janeiro 2024</p>
+                            <p class="text-2xl font-bold text-gray-900">R$ 45.2M</p>
+                            <p class="text-sm text-green-600">↗ +12.3% vs mês anterior</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">EBITDA</h4>
+                                <i class="fas fa-chart-line text-blue-600"></i>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">Janeiro 2024</p>
+                            <p class="text-2xl font-bold text-gray-900">R$ 18.7M</p>
+                            <p class="text-sm text-green-600">↗ +8.9% vs mês anterior</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Margem EBITDA</h4>
+                                <i class="fas fa-percentage text-purple-600"></i>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">Janeiro 2024</p>
+                            <p class="text-2xl font-bold text-gray-900">41.4%</p>
+                            <p class="text-sm text-red-600">↘ -1.2% vs mês anterior</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-medium text-gray-700">Custos Operacionais</h4>
+                                <i class="fas fa-coins text-orange-600"></i>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-2">Janeiro 2024</p>
+                            <p class="text-2xl font-bold text-gray-900">R$ 26.5M</p>
+                            <p class="text-sm text-red-600">↗ +15.2% vs mês anterior</p>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos Financeiros -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Evolução da Receita (12 meses)</h3>
+                            <div class="chart-container">
+                                <canvas id="receitaEvolutionChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Composição de Custos</h3>
+                            <div class="chart-container">
+                                <canvas id="custosChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Análise Detalhada -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Receita por Tabela</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-4 font-medium text-gray-700">Tabela</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">Receita (R$)</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">% Total</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">Var. Mensal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Tabela I</td>
+                                            <td class="py-3 px-4 text-right">R$ 18.2M</td>
+                                            <td class="py-3 px-4 text-right">40.3%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+8.5%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Tabela II</td>
+                                            <td class="py-3 px-4 text-right">R$ 12.8M</td>
+                                            <td class="py-3 px-4 text-right">28.3%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+15.2%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Tabela III</td>
+                                            <td class="py-3 px-4 text-right">R$ 8.4M</td>
+                                            <td class="py-3 px-4 text-right">18.6%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+12.1%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Arrendamentos</td>
+                                            <td class="py-3 px-4 text-right">R$ 3.9M</td>
+                                            <td class="py-3 px-4 text-right">8.6%</td>
+                                            <td class="py-3 px-4 text-right text-red-600">-2.3%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 font-medium">Outros</td>
+                                            <td class="py-3 px-4 text-right">R$ 1.9M</td>
+                                            <td class="py-3 px-4 text-right">4.2%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+5.7%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Indicadores Chave</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">ROB</span>
+                                        <span class="text-lg font-bold text-green-600">R$ 18.7M</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">ROL</span>
+                                        <span class="text-lg font-bold text-blue-600">R$ 12.4M</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 62%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Liquidez Corrente</span>
+                                        <span class="text-lg font-bold text-green-600">2.1</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 70%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Endividamento</span>
+                                        <span class="text-lg font-bold text-yellow-600">35.2%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 35%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Custos Diretos</span>
+                                        <span class="text-lg font-bold text-red-600">R$ 26.5M</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: 59%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Custos Indiretos</span>
+                                        <span class="text-lg font-bold text-orange-600">R$ 7.6M</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-orange-500 h-2 rounded-full" style="width: 17%"></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700">Margem de Lucro</span>
+                                        <span class="text-lg font-bold text-green-600">24.6%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 82%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Análise por Cliente e Carga -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Receita por Cliente</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-4 font-medium text-gray-700">Cliente</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">Receita (R$)</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">% Total</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">Var. Mensal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Cargill</td>
+                                            <td class="py-3 px-4 text-right">R$ 14.8M</td>
+                                            <td class="py-3 px-4 text-right">32.7%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+11.2%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">ADM</td>
+                                            <td class="py-3 px-4 text-right">R$ 9.6M</td>
+                                            <td class="py-3 px-4 text-right">21.2%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+8.7%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Bunge</td>
+                                            <td class="py-3 px-4 text-right">R$ 7.3M</td>
+                                            <td class="py-3 px-4 text-right">16.1%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+15.8%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Louis Dreyfus</td>
+                                            <td class="py-3 px-4 text-right">R$ 6.2M</td>
+                                            <td class="py-3 px-4 text-right">13.7%</td>
+                                            <td class="py-3 px-4 text-right text-red-600">-3.1%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Cofco</td>
+                                            <td class="py-3 px-4 text-right">R$ 4.1M</td>
+                                            <td class="py-3 px-4 text-right">9.1%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+22.4%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 font-medium">Outros</td>
+                                            <td class="py-3 px-4 text-right">R$ 3.2M</td>
+                                            <td class="py-3 px-4 text-right">7.1%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+6.3%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Receita por Carga</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-4 font-medium text-gray-700">Tipo de Carga</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">Receita (R$)</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">% Total</th>
+                                            <th class="text-right py-3 px-4 font-medium text-gray-700">Var. Mensal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Soja</td>
+                                            <td class="py-3 px-4 text-right">R$ 19.4M</td>
+                                            <td class="py-3 px-4 text-right">42.9%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+9.2%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Milho</td>
+                                            <td class="py-3 px-4 text-right">R$ 13.1M</td>
+                                            <td class="py-3 px-4 text-right">29.0%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+14.7%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Açúcar</td>
+                                            <td class="py-3 px-4 text-right">R$ 6.8M</td>
+                                            <td class="py-3 px-4 text-right">15.0%</td>
+                                            <td class="py-3 px-4 text-right text-red-600">-4.8%</td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Farelo de Soja</td>
+                                            <td class="py-3 px-4 text-right">R$ 3.7M</td>
+                                            <td class="py-3 px-4 text-right">8.2%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+18.3%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4 font-medium">Outros</td>
+                                            <td class="py-3 px-4 text-right">R$ 2.2M</td>
+                                            <td class="py-3 px-4 text-right">4.9%</td>
+                                            <td class="py-3 px-4 text-right text-green-600">+7.1%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestão Estratégica Section -->
+            <div id="estrategica-section" class="section-content hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8">Gestão Estratégica</h2>
+                    
+                    <!-- Objetivos Estratégicos -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Objetivos Estratégicos 2024</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-gray-800">Crescimento de Receita</h4>
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Meta Anual</span>
+                                        <span class="font-bold text-gray-800">R$ 580M</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Realizado YTD</span>
+                                        <span class="font-bold text-green-600">R$ 45.2M</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-green-500 h-3 rounded-full" style="width: 7.8%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500">7.8% da meta anual (Jan)</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-gray-800">Eficiência Operacional</h4>
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-cogs text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Meta</span>
+                                        <span class="font-bold text-gray-800">96%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Atual</span>
+                                        <span class="font-bold text-yellow-600">94.2%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-yellow-500 h-3 rounded-full" style="width: 98%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500">98% da meta (necessário +1.8%)</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-gray-800">Expansão de Capacidade</h4>
+                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-expand-arrows-alt text-purple-600"></i>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Meta</span>
+                                        <span class="font-bold text-gray-800">1.8M ton/ano</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Atual</span>
+                                        <span class="font-bold text-blue-600">1.5M ton/ano</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-500 h-3 rounded-full" style="width: 83%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500">83% da meta (obras em andamento)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Iniciativas Estratégicas -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Iniciativas Estratégicas</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Projeto Automação 4.0</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Status</span>
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Em Andamento</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Progresso</span>
+                                        <span class="font-bold text-blue-600">35%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 35%"></div>
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        <p><strong>Próximos marcos:</strong></p>
+                                        <ul class="list-disc list-inside mt-2 space-y-1">
+                                            <li>Instalação sensores IoT - Fev/24</li>
+                                            <li>Testes sistema integrado - Mar/24</li>
+                                            <li>Go-live fase 1 - Abr/24</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Expansão Berço 3</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Status</span>
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Planejamento</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Progresso</span>
+                                        <span class="font-bold text-green-600">15%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        <p><strong>Próximos marcos:</strong></p>
+                                        <ul class="list-disc list-inside mt-2 space-y-1">
+                                            <li>Aprovação licenças - Mar/24</li>
+                                            <li>Início obras civis - Jun/24</li>
+                                            <li>Conclusão prevista - Dez/25</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Análise SWOT -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Análise SWOT</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-green-50 p-6 rounded-xl border border-green-200">
+                                    <h4 class="font-semibold text-green-800 mb-4 flex items-center">
+                                        <i class="fas fa-plus-circle mr-2"></i>
+                                        Forças
+                                    </h4>
+                                    <ul class="space-y-2 text-sm text-green-700">
+                                        <li>• Localização estratégica</li>
+                                        <li>• Eficiência operacional</li>
+                                        <li>• Relacionamento com clientes</li>
+                                        <li>• Equipe experiente</li>
+                                        <li>• Infraestrutura moderna</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-red-50 p-6 rounded-xl border border-red-200">
+                                    <h4 class="font-semibold text-red-800 mb-4 flex items-center">
+                                        <i class="fas fa-minus-circle mr-2"></i>
+                                        Fraquezas
+                                    </h4>
+                                    <ul class="space-y-2 text-sm text-red-700">
+                                        <li>• Dependência de commodities</li>
+                                        <li>• Capacidade limitada</li>
+                                        <li>• Sazonalidade</li>
+                                        <li>• Custos de manutenção</li>
+                                        <li>• Automação parcial</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                                    <h4 class="font-semibold text-blue-800 mb-4 flex items-center">
+                                        <i class="fas fa-lightbulb mr-2"></i>
+                                        Oportunidades
+                                    </h4>
+                                    <ul class="space-y-2 text-sm text-blue-700">
+                                        <li>• Crescimento do agronegócio</li>
+                                        <li>• Novos mercados asiáticos</li>
+                                        <li>• Tecnologia 4.0</li>
+                                        <li>• Parcerias estratégicas</li>
+                                        <li>• Sustentabilidade</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-yellow-50 p-6 rounded-xl border border-yellow-200">
+                                    <h4 class="font-semibold text-yellow-800 mb-4 flex items-center">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        Ameaças
+                                    </h4>
+                                    <ul class="space-y-2 text-sm text-yellow-700">
+                                        <li>• Novos concorrentes</li>
+                                        <li>• Regulamentações ambientais</li>
+                                        <li>• Volatilidade de preços</li>
+                                        <li>• Mudanças climáticas</li>
+                                        <li>• Instabilidade econômica</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPIs Estratégicos -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Balanced Scorecard</h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Perspectiva Financeira</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">ROI</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">24.8%</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Margem EBITDA</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-yellow-600">41.4%</span>
+                                            <i class="fas fa-arrow-down text-red-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Crescimento Receita</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">+12.3%</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Perspectiva do Cliente</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Satisfação do Cliente</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">4.7/5</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Retenção de Clientes</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">94%</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Novos Contratos</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-blue-600">3</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Processos Internos</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Eficiência Operacional</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-yellow-600">94.2%</span>
+                                            <i class="fas fa-arrow-down text-red-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Tempo Médio Operação</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">7.2h</span>
+                                            <i class="fas fa-arrow-down text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Incidentes de Segurança</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">0</span>
+                                            <i class="fas fa-check text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Aprendizado e Crescimento</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Satisfação Funcionários</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">4.2/5</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Horas de Treinamento</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-blue-600">32h</span>
+                                            <i class="fas fa-arrow-up text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">Turnover</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-green-600">5.2%</span>
+                                            <i class="fas fa-arrow-down text-green-500 text-xs"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap Estratégico -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Roadmap Estratégico 2024-2026</h3>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                            <div class="space-y-8">
+                                <div class="relative">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                            2024
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-800 mb-2">Consolidação e Eficiência</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-blue-800">Automação Fase 1</p>
+                                                    <p class="text-xs text-blue-600">Q2-Q3</p>
+                                                </div>
+                                                <div class="bg-green-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-green-800">Certificação ISO 14001</p>
+                                                    <p class="text-xs text-green-600">Q3</p>
+                                                </div>
+                                                <div class="bg-purple-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-purple-800">Expansão Equipe TI</p>
+                                                    <p class="text-xs text-purple-600">Q1-Q2</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">
+                                            2025
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-800 mb-2">Expansão e Inovação</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-blue-800">Berço 3 Operacional</p>
+                                                    <p class="text-xs text-blue-600">Q4</p>
+                                                </div>
+                                                <div class="bg-green-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-green-800">Automação Completa</p>
+                                                    <p class="text-xs text-green-600">Q2-Q3</p>
+                                                </div>
+                                                <div class="bg-purple-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-purple-800">Novos Mercados</p>
+                                                    <p class="text-xs text-purple-600">Q1-Q4</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="relative">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                            2026
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-gray-800 mb-2">Liderança e Sustentabilidade</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-blue-800">Hub Logístico Regional</p>
+                                                    <p class="text-xs text-blue-600">Q2-Q4</p>
+                                                </div>
+                                                <div class="bg-green-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-green-800">Carbono Neutro</p>
+                                                    <p class="text-xs text-green-600">Q4</p>
+                                                </div>
+                                                <div class="bg-purple-50 p-3 rounded-lg">
+                                                    <p class="text-sm font-medium text-purple-800">Parcerias Estratégicas</p>
+                                                    <p class="text-xs text-purple-600">Q1-Q3</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inteligência de Mercado Section -->
+            <div id="inteligencia-section" class="section-content hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8">Inteligência de Mercado</h2>
+                    
+                    <!-- Previsões de Curto Prazo (2024) -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Previsões para 2024 - Curto Prazo</h3>
+                        
+                        <!-- Previsão Mensal por Produto -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Previsão de Movimentação - Próximos Meses</h4>
+                                <div class="chart-container">
+                                    <canvas id="previsaoMensalChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Previsão de Faturamento - Próximos Meses</h4>
+                                <div class="chart-container">
+                                    <canvas id="previsaoFaturamentoChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previsões por Produto -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-gray-800">Soja - 2024</h4>
+                                    <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-seedling text-yellow-600"></i>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Volume Previsto</span>
+                                        <span class="font-bold text-gray-800">742k ton</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Crescimento</span>
+                                        <span class="font-bold text-green-600">+12.5%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Receita Estimada</span>
+                                        <span class="font-bold text-gray-800">R$ 28.2M</span>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                                        <p class="text-xs text-green-700">Safra favorável + demanda chinesa forte</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-gray-800">Milho - 2024</h4>
+                                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-corn text-orange-600"></i>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Volume Previsto</span>
+                                        <span class="font-bold text-gray-800">356k ton</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Crescimento</span>
+                                        <span class="font-bold text-green-600">+8.3%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Receita Estimada</span>
+                                        <span class="font-bold text-gray-800">R$ 15.8M</span>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                        <p class="text-xs text-blue-700">Segunda safra promissora + exportações</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-semibold text-gray-800">Açúcar - 2024</h4>
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-cube text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Volume Previsto</span>
+                                        <span class="font-bold text-gray-800">98k ton</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Crescimento</span>
+                                        <span class="font-bold text-red-600">-5.2%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-600">Receita Estimada</span>
+                                        <span class="font-bold text-gray-800">R$ 4.2M</span>
+                                    </div>
+                                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg">
+                                        <p class="text-xs text-yellow-700">Migração para etanol afeta volume</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Previsões de Médio Prazo (5 anos) -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Projeções de Médio Prazo (2024-2029)</h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Projeção de Crescimento - 5 Anos</h4>
+                                <div class="chart-container">
+                                    <canvas id="projecao5AnosChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Comparativo com Concorrentes - Projeção</h4>
+                                <div class="chart-container">
+                                    <canvas id="comparativoConcorrentesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cenários de Médio Prazo -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-green-800 mb-4">Cenário Otimista (2029)</h4>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Movimentação Total</span>
+                                        <span class="font-bold text-green-600">2.1M ton</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">CAGR</span>
+                                        <span class="font-bold text-green-600">12.1%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Receita Anual</span>
+                                        <span class="font-bold text-green-600">R$ 89M</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Market Share</span>
+                                        <span class="font-bold text-green-600">28%</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                                    <p class="text-xs text-green-700">Expansão de capacidade + novos mercados + automação completa</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-blue-800 mb-4">Cenário Base (2029)</h4>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Movimentação Total</span>
+                                        <span class="font-bold text-blue-600">1.7M ton</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">CAGR</span>
+                                        <span class="font-bold text-blue-600">7.3%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Receita Anual</span>
+                                        <span class="font-bold text-blue-600">R$ 68M</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Market Share</span>
+                                        <span class="font-bold text-blue-600">22%</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                    <p class="text-xs text-blue-700">Crescimento moderado seguindo tendências do setor</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-red-800 mb-4">Cenário Conservador (2029)</h4>
+                                <div class="space-y-4">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Movimentação Total</span>
+                                        <span class="font-bold text-red-600">1.4M ton</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">CAGR</span>
+                                        <span class="font-bold text-red-600">3.1%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Receita Anual</span>
+                                        <span class="font-bold text-red-600">R$ 52M</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-gray-700">Market Share</span>
+                                        <span class="font-bold text-red-600">18%</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-3 bg-red-50 rounded-lg">
+                                    <p class="text-xs text-red-700">Competição acirrada + restrições ambientais</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Análise Competitiva -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-6">Análise Competitiva - Projeções</h3>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+                            <h4 class="font-semibold text-gray-800 mb-4">Posicionamento Competitivo - Projeção 2029</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-200">
+                                            <th class="text-left py-3 px-4 font-medium text-gray-700">Terminal</th>
+                                            <th class="text-center py-3 px-4 font-medium text-gray-700">Volume Atual (2024)</th>
+                                            <th class="text-center py-3 px-4 font-medium text-gray-700">Volume Projetado (2029)</th>
+                                            <th class="text-center py-3 px-4 font-medium text-gray-700">CAGR</th>
+                                            <th class="text-center py-3 px-4 font-medium text-gray-700">Market Share 2029</th>
+                                            <th class="text-center py-3 px-4 font-medium text-gray-700">Posição</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b border-gray-100 bg-blue-50">
+                                            <td class="py-3 px-4 font-medium text-blue-800">EC Infra</td>
+                                            <td class="py-3 px-4 text-center">1.2M ton</td>
+                                            <td class="py-3 px-4 text-center font-bold text-blue-600">1.7M ton</td>
+                                            <td class="py-3 px-4 text-center text-green-600 font-medium">7.3%</td>
+                                            <td class="py-3 px-4 text-center font-bold text-blue-600">22%</td>
+                                            <td class="py-3 px-4 text-center"><span class="px-2 py-1 bg-blue-200 text-blue-800 rounded text-xs font-medium">1º</span></td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Terminal Paranaguá</td>
+                                            <td class="py-3 px-4 text-center">1.05M ton</td>
+                                            <td class="py-3 px-4 text-center">1.4M ton</td>
+                                            <td class="py-3 px-4 text-center text-yellow-600 font-medium">5.9%</td>
+                                            <td class="py-3 px-4 text-center">18%</td>
+                                            <td class="py-3 px-4 text-center"><span class="px-2 py-1 bg-gray-200 text-gray-800 rounded text-xs font-medium">2º</span></td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Porto de Itajaí</td>
+                                            <td class="py-3 px-4 text-center">890k ton</td>
+                                            <td class="py-3 px-4 text-center">1.3M ton</td>
+                                            <td class="py-3 px-4 text-center text-green-600 font-medium">7.9%</td>
+                                            <td class="py-3 px-4 text-center">17%</td>
+                                            <td class="py-3 px-4 text-center"><span class="px-2 py-1 bg-gray-200 text-gray-800 rounded text-xs font-medium">3º</span></td>
+                                        </tr>
+                                        <tr class="border-b border-gray-100">
+                                            <td class="py-3 px-4 font-medium">Terminal Rio Grande</td>
+                                            <td class="py-3 px-4 text-center">756k ton</td>
+                                            <td class="py-3 px-4 text-center">1.1M ton</td>
+                                            <td class="py-3 px-4 text-center text-green-600 font-medium">7.8%</td>
+                                            <td class="py-3 px-4 text-center">14%</td>
+                                            <td class="py-3 px-4 text-center"><span class="px-2 py-1 bg-gray-200 text-gray-800 rounded text-xs font-medium">4º</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Fatores Competitivos -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Vantagens Competitivas</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Localização Estratégica</h5>
+                                            <p class="text-sm text-gray-600">Proximidade com principais regiões produtoras</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Eficiência Operacional</h5>
+                                            <p class="text-sm text-gray-600">Taxa de carregamento 14% acima da média</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Investimentos em Tecnologia</h5>
+                                            <p class="text-sm text-gray-600">Automação planejada para 2025-2026</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Relacionamento com Clientes</h5>
+                                            <p class="text-sm text-gray-600">Contratos de longo prazo estabelecidos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h4 class="font-semibold text-gray-800 mb-4">Desafios e Riscos</h4>
+                                <div class="space-y-4">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Novos Concorrentes</h5>
+                                            <p class="text-sm text-gray-600">3 novos terminais previstos até 2027</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Regulamentações Ambientais</h5>
+                                            <p class="text-sm text-gray-600">Novas exigências podem aumentar custos</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Volatilidade de Commodities</h5>
+                                            <p class="text-sm text-gray-600">Preços podem afetar volumes</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-2 h-2 bg-gray-500 rounded-full mt-2"></div>
+                                        <div>
+                                            <h5 class="font-medium text-gray-800">Necessidade de Investimentos</h5>
+                                            <p class="text-sm text-gray-600">R$ 45M em capex nos próximos 3 anos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sustentabilidade Section -->
+            <div id="sustentabilidade-section" class="section-content hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8">Sustentabilidade</h2>
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                        <div class="text-center">
+                            <i class="fas fa-leaf text-6xl text-green-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Seção em Desenvolvimento</h3>
+                            <p class="text-gray-600">Esta seção será implementada em breve com métricas ambientais, sociais e de governança.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RH Section -->
+            <div id="rh-section" class="section-content hidden">
+                <div class="p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-8">Gestão da Infraestrutura</h2>
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                        <div class="text-center">
+                            <i class="fas fa-users text-6xl text-blue-500 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Seção em Desenvolvimento</h3>
+                            <p class="text-gray-600">Esta seção será implementada em breve com métricas de RH, treinamentos e desenvolvimento.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Initialize charts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+        });
+
+        function initializeCharts() {
+            // Dashboard Charts
+            if (document.getElementById('movimentacaoChart')) {
+                const ctx1 = document.getElementById('movimentacaoChart').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [
+                            {
+                                label: 'Toneladas 2024',
+                                data: [85, 92, 108, 125, 142, 138, 95, 112, 128, 115, 89, 76],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                fill: false,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Toneladas 2023',
+                                data: [78, 85, 98, 115, 128, 125, 88, 102, 118, 108, 82, 70],
+                                borderColor: '#93c5fd',
+                                backgroundColor: 'rgba(147, 197, 253, 0.1)',
+                                tension: 0.4,
+                                fill: false,
+                                borderDash: [5, 5],
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'TEU 2024',
+                                data: [2.8, 3.1, 3.6, 4.2, 4.8, 4.6, 3.2, 3.8, 4.3, 3.9, 3.0, 2.5],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4,
+                                fill: false,
+                                yAxisID: 'y1'
+                            },
+                            {
+                                label: 'TEU 2023',
+                                data: [2.5, 2.8, 3.2, 3.8, 4.2, 4.0, 2.9, 3.4, 3.9, 3.5, 2.7, 2.2],
+                                borderColor: '#6ee7b7',
+                                backgroundColor: 'rgba(110, 231, 183, 0.1)',
+                                tension: 0.4,
+                                fill: false,
+                                borderDash: [5, 5],
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Toneladas (mil)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'TEU (mil)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('receitaChart')) {
+                const ctx2 = document.getElementById('receitaChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Soja', 'Milho', 'Açúcar', 'Outros'],
+                        datasets: [{
+                            data: [18.2, 12.8, 8.4, 5.8],
+                            backgroundColor: ['#fbbf24', '#f97316', '#3b82f6', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': R$ ' + context.parsed.toFixed(1) + 'M (' + percentage + '%)';
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: 'white',
+                                font: {
+                                    weight: 'bold',
+                                    size: 11
+                                },
+                                formatter: function(value, context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return percentage + '%\nR$ ' + value.toFixed(1) + 'M';
+                                }
+                            }
+                        },
+                        elements: {
+                            center: {
+                                text: 'R$ 45.2M\nTotal',
+                                color: '#374151',
+                                fontStyle: 'Arial',
+                                sidePadding: 20,
+                                minFontSize: 20,
+                                lineHeight: 25
+                            }
+                        }
+                    },
+                    plugins: [{
+                        beforeDraw: function(chart) {
+                            const width = chart.width,
+                                  height = chart.height,
+                                  ctx = chart.ctx;
+                            
+                            ctx.restore();
+                            const fontSize = (height / 114).toFixed(2);
+                            ctx.font = "bold " + fontSize + "em Arial";
+                            ctx.textBaseline = "middle";
+                            ctx.fillStyle = "#374151";
+                            
+                            const text = "R$ 45.2M";
+                            const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                            const textY = height / 2 - 10;
+                            
+                            ctx.fillText(text, textX, textY);
+                            
+                            ctx.font = fontSize * 0.6 + "em Arial";
+                            ctx.fillStyle = "#6b7280";
+                            const subText = "Total";
+                            const subTextX = Math.round((width - ctx.measureText(subText).width) / 2);
+                            const subTextY = height / 2 + 15;
+                            
+                            ctx.fillText(subText, subTextX, subTextY);
+                            ctx.save();
+                        }
+                    }]
+                });
+            }
+
+            // Financial Charts
+            if (document.getElementById('receitaEvolutionChart')) {
+                const ctx3 = document.getElementById('receitaEvolutionChart').getContext('2d');
+                new Chart(ctx3, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [
+                            {
+                                label: 'Receita 2024',
+                                data: [45.2, 48.7, 52.3, 49.8, 54.1, 51.6, null, null, null, null, null, null],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4,
+                                fill: false,
+                                borderWidth: 3,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: '#10b981',
+                                pointRadius: 6
+                            },
+                            {
+                                label: 'Receita 2023',
+                                data: [32.5, 35.2, 41.8, 48.2, 52.1, 49.8, 38.4, 42.6, 46.8, 44.2, 38.9, 35.6],
+                                borderColor: '#94a3b8',
+                                backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                                tension: 0.4,
+                                fill: false,
+                                borderDash: [5, 5],
+                                pointBackgroundColor: '#94a3b8',
+                                pointBorderColor: '#94a3b8',
+                                pointRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        if (context.datasetIndex === 0 && context.dataIndex === 0) {
+                                            const current = context.parsed.y;
+                                            const previous = 32.5; // Jan 2023
+                                            const change = ((current - previous) / previous * 100).toFixed(1);
+                                            const arrow = change > 0 ? '↗' : '↘';
+                                            return `${context.dataset.label}: R$ ${current}M (${arrow} ${Math.abs(change)}% vs 2023)`;
+                                        }
+                                        return `${context.dataset.label}: R$ ${context.parsed.y}M`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Receita (R$ milhões)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value + 'M';
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Período'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('custosChart')) {
+                const ctx4 = document.getElementById('custosChart').getContext('2d');
+                new Chart(ctx4, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pessoal', 'Manutenção', 'Energia', 'Combustível', 'Outros'],
+                        datasets: [{
+                            data: [9.3, 6.6, 4.0, 3.2, 3.4],
+                            backgroundColor: ['#ef4444', '#f97316', '#fbbf24', '#10b981', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            return {
+                                                text: `${label}: R$ ${value.toFixed(1)}M`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].backgroundColor[i],
+                                                lineWidth: 0,
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return `${context.label}: R$ ${context.parsed.toFixed(1)}M (${percentage}%)`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true,
+                                color: 'white',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                },
+                                formatter: function(value, context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return percentage + '%';
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Intelligence Charts
+            if (document.getElementById('previsaoMensalChart')) {
+                const ctx5 = document.getElementById('previsaoMensalChart').getContext('2d');
+                new Chart(ctx5, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [
+                            {
+                                label: 'Soja',
+                                data: [45, 52, 68, 78, 85, 82, 58, 65, 72, 68, 52, 42],
+                                borderColor: '#fbbf24',
+                                backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Milho',
+                                data: [28, 32, 35, 38, 42, 45, 32, 38, 42, 38, 32, 28],
+                                borderColor: '#f97316',
+                                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Açúcar',
+                                data: [12, 8, 5, 9, 15, 11, 5, 9, 14, 9, 5, 6],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Volume (mil ton)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('previsaoFaturamentoChart')) {
+                const ctx6 = document.getElementById('previsaoFaturamentoChart').getContext('2d');
+                new Chart(ctx6, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [{
+                            label: 'Faturamento Previsto (R$ milhões)',
+                            data: [34.2, 37.8, 44.5, 51.2, 55.8, 53.4, 41.2, 45.8, 50.2, 47.6, 41.8, 38.2],
+                            backgroundColor: '#10b981'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('projecao5AnosChart')) {
+                const ctx7 = document.getElementById('projecao5AnosChart').getContext('2d');
+                new Chart(ctx7, {
+                    type: 'line',
+                    data: {
+                        labels: ['2024', '2025', '2026', '2027', '2028', '2029'],
+                        datasets: [
+                            {
+                                label: 'EC Infra',
+                                data: [1200, 1320, 1450, 1580, 1650, 1700],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 3
+                            },
+                            {
+                                label: 'Terminal Paranaguá',
+                                data: [1050, 1120, 1200, 1280, 1350, 1400],
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.4,
+                                borderDash: [5, 5]
+                            },
+                            {
+                                label: 'Porto de Itajaí',
+                                data: [890, 980, 1080, 1150, 1220, 1300],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4,
+                                borderDash: [5, 5]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: 'Volume (mil ton)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (document.getElementById('comparativoConcorrentesChart')) {
+                const ctx8 = document.getElementById('comparativoConcorrentesChart').getContext('2d');
+                new Chart(ctx8, {
+                    type: 'bar',
+                    data: {
+                        labels: ['EC Infra', 'Terminal Paranaguá', 'Porto de Itajaí', 'Terminal Rio Grande'],
+                        datasets: [
+                            {
+                                label: '2024',
+                                data: [1200, 1050, 890, 756],
+                                backgroundColor: '#3b82f6'
+                            },
+                            {
+                                label: '2029 (Projeção)',
+                                data: [1700, 1400, 1300, 1100],
+                                backgroundColor: '#10b981'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Volume (mil ton)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+<script>
+function showInfraTab(tabName) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.infra-tab-content');
+    tabContents.forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tabs
+    const tabs = document.querySelectorAll('.infra-tab');
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        tab.classList.add('text-gray-500');
+    });
+    
+    // Show selected tab content
+    const targetContent = document.getElementById(tabName + '-tab');
+    if (targetContent) {
+        targetContent.classList.remove('hidden');
+    }
+    
+    // Add active class to clicked tab
+    event.target.closest('.infra-tab').classList.add('active');
+    event.target.closest('.infra-tab').classList.remove('text-gray-500');
+}
+</script>
+
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'964cb4c0223251b8',t:'MTc1MzQ1NzUwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
