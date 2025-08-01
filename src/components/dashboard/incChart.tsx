@@ -16,7 +16,7 @@ interface IncomeChartProps {
 const COLORS = ['#fbbf24', '#f97316', '#3b82f6', '#8b5cf6'];
 
 
-export function ReceitaChart({ data }: IncomeChartProps) {
+export function IncomeChart({ data }: IncomeChartProps) {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const renderCustomTooltip = ({ active, payload }: any) => {

@@ -47,7 +47,7 @@ export function ShipQueueCard({ data }: ShipQueueCardProps) {
                     </thead>
                     <tbody className="text-sm">
                         {data.map((item, idx) => (
-                            <tr key={idx} className="border-t last:border-b border-gray-200">
+                            <tr key={idx} className="border-b last:border-b border-gray-200">
                                 <td className="font-semibold py-2">{item.navio}</td>
                                 <td>{item.tipo_carga}</td>
                                 <td>{item.quantidade}</td>

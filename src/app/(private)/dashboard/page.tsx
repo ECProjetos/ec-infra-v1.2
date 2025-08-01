@@ -8,8 +8,8 @@ import {
 
 import "animate.css";
 import { MovimentacaoChart } from "@/components/dashboard/movChart";
-import { ReceitaChart } from "@/components/dashboard/incChart";
 import { EquipCard, ShipsCard, AlertsCard } from "@/components/dashboard/botCards";
+import { DonutChart } from "@/components/charts/donutChart";
 
 export const mockEquipamentos = [
     { name: "Guindastes", status: "Operacional" },
@@ -59,18 +59,18 @@ const shipsMock = [
 
 
 const MovChartData = [
-    { month: 'Jan', t2024: 85, t2023: 78, teu2024: 2.8, teu2023: 2.5 },
-    { month: 'Fev', t2024: 92, t2023: 85, teu2024: 3.1, teu2023: 2.8 },
-    { month: 'Mar', t2024: 108, t2023: 98, teu2024: 3.6, teu2023: 3.2 },
-    { month: 'Abr', t2024: 125, t2023: 115, teu2024: 4.2, teu2023: 3.8 },
-    { month: 'Mai', t2024: 142, t2023: 128, teu2024: 4.8, teu2023: 4.2 },
-    { month: 'Jun', t2024: 138, t2023: 125, teu2024: 4.6, teu2023: 4.0 },
-    { month: 'Jul', t2024: 95, t2023: 88, teu2024: 3.2, teu2023: 2.9 },
-    { month: 'Ago', t2024: 112, t2023: 102, teu2024: 3.8, teu2023: 3.4 },
-    { month: 'Set', t2024: 128, t2023: 118, teu2024: 4.3, teu2023: 3.9 },
-    { month: 'Out', t2024: 115, t2023: 108, teu2024: 3.9, teu2023: 3.5 },
-    { month: 'Nov', t2024: 89, t2023: 82, teu2024: 3.0, teu2023: 2.7 },
-    { month: 'Dez', t2024: 76, t2023: 70, teu2024: 2.5, teu2023: 2.2 },
+    { month: 'Jan', tano2: 85, tano1: 78, teuano2: 2.8, teuano1: 2.5 },
+    { month: 'Fev', tano2: 92, tano1: 85, teuano2: 3.1, teuano1: 2.8 },
+    { month: 'Mar', tano2: 108, tano1: 98, teuano2: 3.6, teuano1: 3.2 },
+    { month: 'Abr', tano2: 125, tano1: 115, teuano2: 4.2, teuano1: 3.8 },
+    { month: 'Mai', tano2: 142, tano1: 128, teuano2: 4.8, teuano1: 4.2 },
+    { month: 'Jun', tano2: 138, tano1: 125, teuano2: 4.6, teuano1: 4.0 },
+    { month: 'Jul', tano2: 95, tano1: 88, teuano2: 3.2, teuano1: 2.9 },
+    { month: 'Ago', tano2: 112, tano1: 102, teuano2: 3.8, teuano1: 3.4 },
+    { month: 'Set', tano2: 128, tano1: 118, teuano2: 4.3, teuano1: 3.9 },
+    { month: 'Out', tano2: 115, tano1: 108, teuano2: 3.9, teuano1: 3.5 },
+    { month: 'Nov', tano2: 89, tano1: 82, teuano2: 3.0, teuano1: 2.7 },
+    { month: 'Dez', tano2: 76, tano1: 70, teuano2: 2.5, teuano1: 2.2 },
 ]
 
 const topCardsMockData = [
@@ -121,15 +121,20 @@ export default function Dashboard() {
             <div className="flex gap-10 animate__animated animate__backInUp">
                 <TopCards data={topCardsMockData} />
             </div>
-            <div className="flex flex-row gap-6 mt-10 items-stretch animate__animated animate__backInUp animate__delay-2s">
-                <div className="w-1/2 bg-white rounded-xl p-4 shadow-md">
+            <div className="flex flex-row gap-6 mt-10 animate__animated animate__backInUp">
+                <div className="w-1/2 p-4 ">
                     <MovimentacaoChart data={MovChartData} />
                 </div>
-                <div className="w-1/2 bg-white rounded-xl p-4 shadow-md">
-                    <ReceitaChart data={IncomeData} />
+                <div className="w-1/2 p-4">
+                    <DonutChart
+                        title="Receita por Tipo de Carga"
+                        data={IncomeData}
+                        unit="R$"
+                        showTotal={true} />
+
                 </div>
             </div>
-            <div className="flex gap-10 animate__animated animate__backInUp mt-10 animate__delay-3s">
+            <div className="flex gap-10 animate__animated animate__backInUp mt-10 animate__delay-1s">
                 <div className="w-1/3">
                     <div className="rounded-xl h-[250px]">
                         <EquipCard data={mockEquipamentos} />
