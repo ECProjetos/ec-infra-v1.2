@@ -10,10 +10,10 @@ export default async function PrivateLayout({
     return (
         <div>
             <AppNav />
-            <SidebarProvider>
+            <SidebarProvider >
                 <AppSidebar />
                 <SidebarInset>
-                    <main className="bg-blue-100 h-screen w-full mt-20">
+                    <main className="h-screen w-full mt-20">
                         {children}
                     </main>
                 </SidebarInset>
