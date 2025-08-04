@@ -38,12 +38,12 @@ const items = [
     },
     {
         title: "Gestão Estratégica",
-        url: "#",
+        url: "/estrategica",
         icon: Puzzle,
     },
     {
         title: "Inteligência de Mercado",
-        url: "#",
+        url: "mercado",
         icon: Globe2,
     },
     {
