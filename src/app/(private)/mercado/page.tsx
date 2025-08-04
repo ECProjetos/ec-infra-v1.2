@@ -9,7 +9,7 @@ import { ProdutoResumoCard } from "@/components/mercado/productSummary";
 import { CenarioResumoCard } from "@/components/mercado/scenary";
 import { Leaf, Warehouse, Package } from "lucide-react";
 
-export const cargasData = [
+const cargasData = [
     { month: "Jan", soja: 48, milho: 30, acucar: 12, trigo: 5 },
     { month: "Fev", soja: 55, milho: 33, acucar: 9, trigo: 7 },
     { month: "Mar", soja: 68, milho: 36, acucar: 7, trigo: 9 },
@@ -24,7 +24,7 @@ export const cargasData = [
     { month: "Dez", soja: 43, milho: 30, acucar: 9, trigo: 7 },
 ];
 
-export const faturamentoMock = [
+const faturamentoMock = [
     { month: "Jan", value: 34 },
     { month: "Fev", value: 38 },
     { month: "Mar", value: 44 },
@@ -39,7 +39,7 @@ export const faturamentoMock = [
     { month: "Dez", value: 38 },
 ];
 
-export const produtosCargas = [
+const produtosCargas = [
     { key: "soja", label: "Soja", color: "#facc15" },
     { key: "milho", label: "Milho", color: "#fb923c" },
     { key: "acucar", label: "Açúcar", color: "#3b82f6" },
@@ -104,7 +104,7 @@ const concorrentesData = [
     { name: "Terminal Rio Grande", "2024": 760, "2029": 1100 },
 ];
 
-export const cenariosData = [
+const cenariosData = [
     {
         title: "Cenário Otimista (2029)",
         info: [
@@ -140,7 +140,7 @@ export const cenariosData = [
     },
 ];
 
-export const posicionamentoData = [
+const posicionamentoData = [
     {
         terminal: "EC Infra",
         volumeAtual: "1.2M ton",
@@ -181,7 +181,7 @@ export const posicionamentoData = [
     },
 ];
 
-export const vantagensCompetitivas = [
+const vantagensCompetitivas = [
     {
         titulo: "Localização Estratégica",
         descricao: "Proximidade com principais regiões produtoras",
@@ -204,7 +204,7 @@ export const vantagensCompetitivas = [
     },
 ];
 
-export const desafiosERiscos = [
+const desafiosERiscos = [
     {
         titulo: "Novos Concorrentes",
         descricao: "3 novos terminais previstos até 2027",

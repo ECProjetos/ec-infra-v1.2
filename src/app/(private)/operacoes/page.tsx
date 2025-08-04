@@ -9,7 +9,7 @@ import {
 } from "@/components/operacoes/botCards"
 
 
-export const operationTimeMock = {
+const operationTimeMock = {
     soja: 6.8,
     milho: 7.4,
     acucar: 8.1,
@@ -21,7 +21,7 @@ export const operationTimeMock = {
     comparativo: "Melhorou 12min vs mês anterior",
 }
 
-export const loadingRateMock = {
+const loadingRateMock = {
     soja: 1920,
     milho: 1780,
     acucar: 1650,
@@ -33,7 +33,7 @@ export const loadingRateMock = {
     observacao: "+5.2% média geral vs meta",
 }
 
-export const occupancyRateMock = {
+const occupancyRateMock = {
     berco1: 96.8,
     berco2: 91.6,
     metas: {
@@ -43,7 +43,7 @@ export const occupancyRateMock = {
     resumo: "Berço 1 acima da meta, Berço 2 abaixo",
 }
 
-export const totalMovedMock = {
+const totalMovedMock = {
     soja: 742,
     milho: 356,
     acucar: 98,

@@ -99,7 +99,7 @@ const swotData = [
 ];
 
 
-export const scorecardData = [
+const scorecardData = [
     {
         title: "Perspectiva Financeira",
         metrics: [
@@ -134,7 +134,7 @@ export const scorecardData = [
     },
 ];
 
-export const roadmapData = [
+const roadmapData = [
     {
         year: 2024,
         label: "Consolidação e Eficiência",

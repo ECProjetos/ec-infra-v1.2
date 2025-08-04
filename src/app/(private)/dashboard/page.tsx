@@ -11,7 +11,7 @@ import { MovimentacaoChart } from "@/components/dashboard/movChart";
 import { EquipCard, ShipsCard, AlertsCard } from "@/components/dashboard/botCards";
 import { DonutChart } from "@/components/charts/donutChart";
 
-export const mockEquipamentos = [
+const mockEquipamentos = [
     { name: "Guindastes", status: "Operacional" },
     { name: "Esteiras", status: "Manutenção" },
     { name: "Silos", status: "Operacional" },
