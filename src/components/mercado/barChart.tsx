@@ -31,7 +31,7 @@ export function GroupedBarChart({
     title
 }: GroupedBarChartProps) {
     return (
-        <Card className="p-4">
+        <Card className="p-4 duration-300 ease-out hover:-translate-y-2">
             {title && <h3 className="text-lg font-semibold mb-2 px-2">{title}</h3>}
             <ResponsiveContainer width="100%" height={height}>
                 <BarChart data={data}>

@@ -33,7 +33,7 @@ export function CenarioResumoCard({
             <h3 className="font-semibold text-base">{title}</h3>
             <div className="text-sm space-y-1">
                 {info.map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-muted-foreground">
+                    <div key={idx} className="flex justify-between text-muted-foreground duration-300 ease-out hover:-translate-y-2">
                         <span>{item.label}</span>
                         <span className={`font-semibold ${item.color ?? "text-gray-900"}`}>
                             {item.value}

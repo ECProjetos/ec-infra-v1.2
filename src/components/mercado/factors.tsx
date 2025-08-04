@@ -16,7 +16,7 @@ export function FatoresCompetitivosCard({
     fatores,
 }: FatoresCompetitivosCardProps) {
     return (
-        <Card className="p-6 rounded-xl border shadow-sm space-y-4 w-full">
+        <Card className="p-6 rounded-xl border shadow-sm space-y-4 w-full duration-300 ease-out hover:-translate-y-2">
             <h3 className="font-semibold text-lg">{titulo}</h3>
             <ul className="space-y-3 text-sm">
                 {fatores.map((item, idx) => (

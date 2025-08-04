@@ -22,7 +22,7 @@ export function FaturamentoChart({
     yAxisLabel = ''                    // pode ser "R$ mil" se quiser
 }: FaturamentoChartProps) {
     return (
-        <Card className="p-4">
+        <Card className="p-4 duration-300 ease-out hover:-translate-y-2">
             <h3 className="text-lg font-semibold mb-2 px-2">
                 Previsão de Faturamento – Próximos Meses
             </h3>

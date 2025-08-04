@@ -25,7 +25,7 @@ interface CargaMovimentacaoChartProps {
 
 export function CargaMovimentacaoChart({ data, produtos, yAxisLabel = "Volume (mil ton)" }: CargaMovimentacaoChartProps) {
     return (
-        <Card className="p-4">
+        <Card className="p-4 duration-300 ease-out hover:-translate-y-2">
             <h3 className="text-lg font-semibold mb-2 px-2">Previsão de Movimentação – Próximos Meses</h3>
             <ResponsiveContainer width="100%" height={340}>
                 <LineChart data={data} margin={{ top: 20, right: 40, left: 20, bottom: 10 }}>

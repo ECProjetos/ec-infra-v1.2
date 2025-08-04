@@ -23,7 +23,7 @@ export function PosicionamentoCompetitivoTable({
     title = "Posicionamento Competitivo - Projeção 2029",
 }: PosicionamentoCompetitivoTableProps) {
     return (
-        <Card className="p-6 rounded-xl shadow-sm border w-full">
+        <Card className="p-6 rounded-xl shadow-sm border w-full duration-300 ease-out hover:-translate-y-2">
             <h3 className="font-semibold text-lg mb-4">{title}</h3>
 
             <div className="overflow-auto">
