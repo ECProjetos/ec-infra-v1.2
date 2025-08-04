@@ -32,7 +32,9 @@ export function CargaMovimentacaoChart({ data, produtos, yAxisLabel = "Volume (m
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }} />
-                    <Tooltip />
+                    <Tooltip
+                        formatter={(value: number) => [`${value.toFixed(2)} `, "(mil toneladas)"]}
+                    />
                     <Legend />
                     {produtos.map((produto) => (
                         <Line
