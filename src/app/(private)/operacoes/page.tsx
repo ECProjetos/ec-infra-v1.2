@@ -119,14 +119,14 @@ const shipQueueMock = [
 export default function Operacoes() {
     return (
         <div className="px-15 py-10 space-y-10">
-            <h1 className="text-2xl font-bold animate__animated animate__backInUp">
+            <h1 className="text-2xl font-bold">
                 Operações Portuárias
             </h1>
 
 
 
             {/* Operações e Capacidade */}
-            <div className="flex gap-6 animate__animated animate__backInUp animate__delay-1s">
+            <div className="flex gap-6 animate__delay-1s">
                 <div className="w-2/3 h-[450px]">
                     <OnGoingCard data={mockData} />
                 </div>
@@ -136,11 +136,11 @@ export default function Operacoes() {
             </div>
 
             {/* Fila de navios */}
-            <div className="animate__animated animate__backInUp animate__delay-2s">
+            <div>
                 <ShipQueueCard data={shipQueueMock} />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate__animated animate__backInUp animate__delay-3s">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <OperationTimeCard data={operationTimeMock} />
                 <LoadingRateCard data={loadingRateMock} />
                 <OccupancyRateCard data={occupancyRateMock} />

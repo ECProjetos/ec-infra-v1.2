@@ -230,7 +230,7 @@ const desafiosERiscos = [
 
 export default function MercadoPage() {
     return (
-        <div className="px-15 py-10 animate__animated animate__backInUp">
+        <div className="px-15 py-10">
             <h1 className="font-bold text-2xl">Gestão Estratégica</h1>
             <h2 className="font-semibold text-2xl mt-8">Objetivos Estratégicos 2024</h2>
 

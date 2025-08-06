@@ -118,10 +118,10 @@ const IncomeData = [
 export default function Dashboard() {
     return (
         <div className="px-15 py-10">
-            <div className="flex gap-10 animate__animated animate__backInUp">
+            <div className="flex gap-10">
                 <TopCards data={topCardsMockData} />
             </div>
-            <div className="flex flex-row gap-6 mt-10 animate__animated animate__backInUp">
+            <div className="flex flex-row gap-6 mt-10">
                 <div className="w-1/2 p-4 ">
                     <MovimentacaoChart data={MovChartData} />
                 </div>
@@ -134,7 +134,7 @@ export default function Dashboard() {
 
                 </div>
             </div>
-            <div className="flex gap-10 animate__animated animate__backInUp mt-10 animate__delay-1s">
+            <div className="flex gap-10">
                 <div className="w-1/3">
                     <div className="rounded-xl h-[250px]">
                         <EquipCard data={mockEquipamentos} />

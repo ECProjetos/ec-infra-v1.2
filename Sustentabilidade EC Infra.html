@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EC Infra - Gestão Ambiental Portuária</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-conforme { background-color: #10b981; }
+        .status-atencao { background-color: #f59e0b; }
+        .status-critico { background-color: #ef4444; }
+        .program-card {
+            border-left: 4px solid #10b981;
+            transition: all 0.3s ease;
+        }
+        .program-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .ida-component {
+            background: linear-gradient(90deg, #e0f2fe 0%, #b3e5fc 100%);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 4px solid #0284c7;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .form-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        .measurement-row:hover {
+            background-color: #f8fafc;
+        }
+        .export-template {
+            display: none;
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            background: white;
+            padding: 40px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .template-header {
+            text-align: center;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .template-section {
+            margin-bottom: 25px;
+        }
+        .template-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .template-table th,
+        .template-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .template-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-xl">
+        <div class="container mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                        <i class="fas fa-anchor text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold">EC Infra</h1>
+                        <p class="text-blue-100 text-lg">Gestão Ambiental Portuária</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-bold text-white">8.73</div>
+                    <div class="text-sm text-blue-100">IDA ANTAQ Atual</div>
+                    <div class="bg-green-500/20 text-green-100 px-3 py-1 rounded-full text-sm mt-2">Excelente</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow-lg border-b-2 border-blue-100">
+        <div class="container mx-auto px-6">
+            <div class="flex space-x-8">
+                <button class="tab-btn active py-4 px-4 border-b-3 border-blue-500 text-blue-600 font-semibold" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </button>
+                <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-600 hover:text-blue-600" data-tab="programs">
+                    <i class="fas fa-project-diagram mr-2"></i>Criar Programas
+                </button>
+                <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-600 hover:text-blue-600" data-tab="management">
+                    <i class="fas fa-tasks mr-2"></i>Gestão & Medições
+                </button>
+                <button class="tab-btn py-4 px-4 border-b-3 border-transparent text-gray-600 hover:text-blue-600" data-tab="ida">
+                    <i class="fas fa-leaf mr-2"></i>IDA ANTAQ
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">IDA ANTAQ</p>
+                            <p class="text-4xl font-bold text-green-600 mt-2" id="dashboardIDA">8.73</p>
+                            <p class="text-green-500 text-sm flex items-center mt-2">
+                                <i class="fas fa-arrow-up mr-1"></i>+0.15 vs anterior
+                            </p>
+                        </div>
+                        <div class="bg-green-100 p-4 rounded-full">
+                            <i class="fas fa-leaf text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Programas Ativos</p>
+                            <p class="text-4xl font-bold text-blue-600 mt-2" id="totalPrograms">23</p>
+                            <p class="text-blue-500 text-sm flex items-center mt-2">
+                                <i class="fas fa-check-circle mr-1"></i><span id="conformePrograms">21</span> conformes
+                            </p>
+                        </div>
+                        <div class="bg-blue-100 p-4 rounded-full">
+                            <i class="fas fa-project-diagram text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-yellow-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Medições Pendentes</p>
+                            <p class="text-4xl font-bold text-yellow-600 mt-2" id="pendingMeasurements">8</p>
+                            <p class="text-red-500 text-sm flex items-center mt-2">
+                                <i class="fas fa-clock mr-1"></i><span id="overdueMeasurements">3</span> atrasadas
+                            </p>
+                        </div>
+                        <div class="bg-yellow-100 p-4 rounded-full">
+                            <i class="fas fa-tasks text-yellow-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover border-l-4 border-red-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm font-medium uppercase tracking-wide">Alertas Críticos</p>
+                            <p class="text-4xl font-bold text-red-600 mt-2">2</p>
+                            <p class="text-red-500 text-sm flex items-center mt-2">
+                                <i class="fas fa-bell mr-1"></i>Ação imediata
+                            </p>
+                        </div>
+                        <div class="bg-red-100 p-4 rounded-full">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Evolução do IDA ANTAQ</h3>
+                    <div class="chart-container">
+                        <canvas id="idaEvolutionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Status dos Programas</h3>
+                    <div class="chart-container">
+                        <canvas id="programsStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Alerts -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                    Alertas Críticos
+                </h3>
+                <div class="space-y-4">
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="font-semibold text-red-800">Monitoramento de Ruído em Atraso</p>
+                                <p class="text-red-600 text-sm mt-1">PCA - Programa de Controle Ambiental</p>
+                                <p class="text-red-500 text-xs mt-2">Prazo vencido há 3 dias</p>
+                            </div>
+                            <span class="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs font-medium">CRÍTICO</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="font-semibold text-orange-800">Relatório PQAA Pendente</p>
+                                <p class="text-orange-600 text-sm mt-1">Programa de Qualidade das Águas</p>
+                                <p class="text-orange-500 text-xs mt-2">Entrega em 2 dias</p>
+                            </div>
+                            <span class="bg-orange-200 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">ATENÇÃO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Programs Tab -->
+        <div id="programs" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Criação de Planos e Programas Ambientais</h2>
+                <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg" onclick="openProgramModal()">
+                    <i class="fas fa-plus mr-2"></i>Novo Programa
+                </button>
+            </div>
+
+            <!-- Program Categories -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Programas Básicos</h3>
+                        <i class="fas fa-water text-2xl opacity-80"></i>
+                    </div>
+                    <p class="text-3xl font-bold mb-2">8</p>
+                    <p class="text-blue-100 text-sm">Obrigatórios por licença</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Programas Específicos</h3>
+                        <i class="fas fa-leaf text-2xl opacity-80"></i>
+                    </div>
+                    <p class="text-3xl font-bold mb-2">12</p>
+                    <p class="text-green-100 text-sm">Condicionantes especiais</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Programas Voluntários</h3>
+                        <i class="fas fa-heart text-2xl opacity-80"></i>
+                    </div>
+                    <p class="text-3xl font-bold mb-2">3</p>
+                    <p class="text-purple-100 text-sm">Iniciativas próprias</p>
+                </div>
+            </div>
+
+            <!-- Programs List -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-800">Programas Criados</h3>
+                    <div class="flex space-x-4">
+                        <select class="border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500">
+                            <option>Todas as categorias</option>
+                            <option>Básicos</option>
+                            <option>Específicos</option>
+                            <option>Voluntários</option>
+                        </select>
+                        <input type="text" placeholder="Buscar programa..." class="border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="programsList">
+                    <!-- Programs will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Tab -->
+        <div id="management" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-bold text-gray-800">Gestão de Medições e Monitoramento</h2>
+                <div class="flex space-x-4">
+                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="addMeasurement()">
+                        <i class="fas fa-plus mr-2"></i>Nova Medição
+                    </button>
+                    <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700" onclick="scheduleAnalysis()">
+                        <i class="fas fa-calendar-plus mr-2"></i>Agendar Análise
+                    </button>
+                    <button class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700" onclick="scheduleReport()">
+                        <i class="fas fa-file-alt mr-2"></i>Agendar Relatório
+                    </button>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onclick="exportReports()">
+                        <i class="fas fa-download mr-2"></i>Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Programa</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="filterProgram">
+                            <option value="">Todos os programas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="filterStatus">
+                            <option value="">Todos os status</option>
+                            <option value="agendado">Agendado</option>
+                            <option value="realizado">Realizado</option>
+                            <option value="atrasado">Atrasado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Início</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="filterDateStart">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Fim</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="filterDateEnd">
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onclick="applyFilters()">
+                        <i class="fas fa-filter mr-2"></i>Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Measurements Table -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800">Cronograma de Medições</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Programa</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Indicador</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Prevista</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resultado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conformidade</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="measurementsTable">
+                            <!-- Measurements will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- IDA Tab -->
+        <div id="ida" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Índice de Desempenho Ambiental - IDA ANTAQ</h2>
+                    <p class="text-gray-600 mt-2">Monitoramento contínuo conforme metodologia ANTAQ</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-5xl font-bold text-green-600" id="currentIDA">8.73</div>
+                    <div class="text-sm text-gray-500">Pontuação atual</div>
+                    <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mt-2">Excelente</div>
+                </div>
+            </div>
+
+            <!-- IDA Components -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Dimensão Ambiental -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-leaf text-green-600 mr-3"></i>
+                        Dimensão Ambiental (Peso: 60%)
+                    </h3>
+                    <div class="space-y-4" id="ambientalComponents">
+                        <!-- Components will be populated by JavaScript -->
+                    </div>
+                    <div class="mt-6 pt-4 border-t">
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-semibold text-gray-800">Pontuação Ambiental:</span>
+                            <span class="text-2xl font-bold text-green-600" id="ambientalScore">8.7</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimensão Social -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-users text-blue-600 mr-3"></i>
+                        Dimensão Social (Peso: 40%)
+                    </h3>
+                    <div class="space-y-4" id="socialComponents">
+                        <!-- Components will be populated by JavaScript -->
+                    </div>
+                    <div class="mt-6 pt-4 border-t">
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-semibold text-gray-800">Pontuação Social:</span>
+                            <span class="text-2xl font-bold text-blue-600" id="socialScore">8.5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IDA Evolution Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Evolução Histórica do IDA</h3>
+                <div class="chart-container">
+                    <canvas id="idaHistoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- IDA Calculation -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">Cálculo Detalhado do IDA</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="bg-green-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-leaf text-green-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Dimensão Ambiental</h4>
+                        <p class="text-3xl font-bold text-green-600 mb-2" id="calcAmbientalScore">8.7</p>
+                        <p class="text-sm text-gray-600">Peso: 60%</p>
+                        <p class="text-sm font-medium text-gray-800">Contribuição: <span id="ambientalContrib">5.22</span></p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="bg-blue-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-users text-blue-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800 mb-2">Dimensão Social</h4>
+                        <p class="text-3xl font-bold text-blue-600 mb-2" id="calcSocialScore">8.5</p>
+                        <p class="text-sm text-gray-600">Peso: 40%</p>
+                        <p class="text-sm font-medium text-gray-800">Contribuição: <span id="socialContrib">3.40</span></p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="bg-purple-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-calculator text-purple-600 text-3xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800 mb-2">IDA Final</h4>
+                        <p class="text-4xl font-bold text-purple-600 mb-2" id="calcFinalIDA">8.73</p>
+                        <p class="text-sm text-gray-600">Fórmula ANTAQ</p>
+                        <p class="text-sm font-medium text-gray-800"><span id="calcFormula">5.22 + 3.40 + 0.11</span></p>
+                        <p class="text-xs text-gray-500 mt-1">*Bônus por excelência</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+                    <h5 class="font-semibold text-gray-800 mb-2">Metodologia de Cálculo:</h5>
+                    <p class="text-sm text-gray-600 mb-2">
+                        <strong>IDA = (Dimensão Ambiental × 0,6) + (Dimensão Social × 0,4) + Bônus</strong>
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        O bônus é aplicado quando ambas as dimensões atingem pontuação superior a 8.5, 
+                        incentivando a excelência em todas as áreas do desempenho ambiental portuário.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Program Modal -->
+    <div id="programModal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold text-gray-800">Criar Novo Programa Ambiental</h3>
+                    <button onclick="closeProgramModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form class="p-6" id="programForm">
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Template do Programa</label>
+                            <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="programTemplate" onchange="loadTemplate()">
+                                <option value="">Selecione um template...</option>
+                                <option value="pqaa">PQAA - Programa de Qualidade das Águas</option>
+                                <option value="pmqa">PMQA - Programa de Monitoramento da Qualidade do Ar</option>
+                                <option value="pgrs">PGRS - Plano de Gerenciamento de Resíduos Sólidos</option>
+                                <option value="pca">PCA - Programa de Controle Ambiental</option>
+                                <option value="peat">PEAT - Programa de Educação Ambiental</option>
+                                <option value="pcs">PCS - Programa de Comunicação Social</option>
+                                <option value="custom">Programa Personalizado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+                            <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="programCategory">
+                                <option value="basico">Programa Básico</option>
+                                <option value="especifico">Programa Específico</option>
+                                <option value="voluntario">Programa Voluntário</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Programa</label>
+                        <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="programName" placeholder="Ex: Programa de Qualidade das Águas Portuárias">
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                        <textarea class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" rows="3" id="programDescription" placeholder="Descreva os objetivos e escopo do programa..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Management Information -->
+                <div class="form-section">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Gestão e Responsabilidades</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Responsável Técnico</label>
+                            <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="programResponsible" placeholder="Nome do responsável">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Data de Início</label>
+                            <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="programStartDate">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Frequência de Monitoramento</label>
+                            <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="programFrequency">
+                                <option value="mensal">Mensal</option>
+                                <option value="bimestral">Bimestral</option>
+                                <option value="trimestral">Trimestral</option>
+                                <option value="semestral">Semestral</option>
+                                <option value="anual">Anual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indicators -->
+                <div class="form-section">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Indicadores de Desempenho</h4>
+                    <div id="indicatorsList">
+                        <div class="indicator-item grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 p-4 bg-white rounded-lg border">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Indicador</label>
+                                <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" placeholder="Nome do indicador">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Unidade</label>
+                                <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" placeholder="Ex: mg/L, dB(A), %">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Meta</label>
+                                <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" placeholder="Valor meta">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Frequência</label>
+                                <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500">
+                                    <option value="semanal">Semanal</option>
+                                    <option value="mensal">Mensal</option>
+                                    <option value="bimestral">Bimestral</option>
+                                    <option value="trimestral">Trimestral</option>
+                                    <option value="semestral">Semestral</option>
+                                    <option value="anual">Anual</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="button" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600" onclick="removeIndicator(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="addIndicator()">
+                        <i class="fas fa-plus mr-2"></i>Adicionar Indicador
+                    </button>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <button type="button" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onclick="closeProgramModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-save mr-2"></i>Criar Programa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule Analysis Modal -->
+    <div id="scheduleAnalysisModal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-800">Agendar Análise/Medição</h3>
+                    <button onclick="closeScheduleAnalysisModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form class="p-6" id="scheduleAnalysisForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Programa</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="scheduleProgram" onchange="loadScheduleIndicators()">
+                            <option value="">Selecione um programa...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Indicador</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="scheduleIndicator">
+                            <option value="">Selecione um indicador...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Prevista</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="scheduleDate">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Horário</label>
+                        <input type="time" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="scheduleTime">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Análise</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="analysisType">
+                            <option value="campo">Medição em Campo</option>
+                            <option value="laboratorio">Análise Laboratorial</option>
+                            <option value="instrumental">Medição Instrumental</option>
+                            <option value="visual">Inspeção Visual</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Responsável pela Coleta</label>
+                        <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="scheduleResponsible" placeholder="Nome do responsável">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Laboratório (se aplicável)</label>
+                        <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="scheduleLab" placeholder="Nome do laboratório">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pontos de Coleta/Medição</label>
+                    <textarea class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" rows="3" id="schedulePoints" placeholder="Descreva os pontos onde serão realizadas as medições..."></textarea>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+                    <textarea class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" rows="2" id="scheduleObservations" placeholder="Observações adicionais sobre o agendamento..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-6">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onclick="closeScheduleAnalysisModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                        <i class="fas fa-calendar-plus mr-2"></i>Agendar Análise
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule Report Modal -->
+    <div id="scheduleReportModal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-800">Agendar Relatório</h3>
+                    <button onclick="closeScheduleReportModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form class="p-6" id="scheduleReportForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Programa</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="reportProgram">
+                            <option value="">Selecione um programa...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Relatório</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="reportType">
+                            <option value="mensal">Relatório Mensal</option>
+                            <option value="trimestral">Relatório Trimestral</option>
+                            <option value="semestral">Relatório Semestral</option>
+                            <option value="anual">Relatório Anual</option>
+                            <option value="especial">Relatório Especial</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data de Entrega</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="reportDeadline">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Responsável pela Elaboração</label>
+                        <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="reportResponsible" placeholder="Nome do responsável">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Período de Referência</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="reportPeriodStart" placeholder="Data início">
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="reportPeriodEnd" placeholder="Data fim">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Destinatários</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" value="antaq"> ANTAQ
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" value="ibama"> IBAMA
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" value="orgao_ambiental"> Órgão Ambiental Estadual
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" value="autoridade_portuaria"> Autoridade Portuária
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" class="mr-2" value="outros"> Outros
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+                    <textarea class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" rows="3" id="reportObservations" placeholder="Observações sobre o relatório..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-6">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onclick="closeScheduleReportModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                        <i class="fas fa-file-alt mr-2"></i>Agendar Relatório
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-800">Exportar Relatórios e Dados</h3>
+                    <button onclick="closeExportModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Programa</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="exportProgram">
+                            <option value="">Todos os programas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="exportPeriod">
+                            <option value="ultimo_mes">Último Mês</option>
+                            <option value="ultimo_trimestre">Último Trimestre</option>
+                            <option value="ultimo_semestre">Último Semestre</option>
+                            <option value="ultimo_ano">Último Ano</option>
+                            <option value="personalizado">Período Personalizado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="customPeriod" class="grid grid-cols-2 gap-4 mb-6 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Início</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="exportDateStart">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Fim</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="exportDateEnd">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Exportação</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button type="button" class="export-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors" onclick="exportData('pdf')">
+                            <div class="text-center">
+                                <i class="fas fa-file-pdf text-3xl text-red-600 mb-2"></i>
+                                <p class="font-medium">Relatório PDF</p>
+                                <p class="text-sm text-gray-600">Relatório completo formatado</p>
+                            </div>
+                        </button>
+                        <button type="button" class="export-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors" onclick="exportData('excel')">
+                            <div class="text-center">
+                                <i class="fas fa-file-excel text-3xl text-green-600 mb-2"></i>
+                                <p class="font-medium">Planilha Excel</p>
+                                <p class="text-sm text-gray-600">Dados para análise</p>
+                            </div>
+                        </button>
+                        <button type="button" class="export-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors" onclick="exportData('word')">
+                            <div class="text-center">
+                                <i class="fas fa-file-word text-3xl text-blue-600 mb-2"></i>
+                                <p class="font-medium">Documento Word</p>
+                                <p class="text-sm text-gray-600">Relatório editável</p>
+                            </div>
+                        </button>
+                        <button type="button" class="export-option p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors" onclick="exportData('csv')">
+                            <div class="text-center">
+                                <i class="fas fa-file-csv text-3xl text-gray-600 mb-2"></i>
+                                <p class="font-medium">Arquivo CSV</p>
+                                <p class="text-sm text-gray-600">Dados brutos</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onclick="closeExportModal()">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Measurement Modal -->
+    <div id="measurementModal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-800">Registrar Medição</h3>
+                    <button onclick="closeMeasurementModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form class="p-6" id="measurementForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Programa</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="measurementProgram" onchange="loadProgramIndicators()">
+                            <option value="">Selecione um programa...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Indicador</label>
+                        <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="measurementIndicator">
+                            <option value="">Selecione um indicador...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Data da Medição</label>
+                        <input type="date" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="measurementDate">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Valor Medido</label>
+                        <input type="number" step="0.01" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" id="measurementValue" placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+                    <textarea class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" rows="3" id="measurementObservations" placeholder="Observações sobre a medição..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-6">
+                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" onclick="closeMeasurementModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-save mr-2"></i>Salvar Medição
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Template (Hidden) -->
+    <div id="exportTemplate" class="export-template">
+        <div class="template-header">
+            <h1>PROGRAMA AMBIENTAL PORTUÁRIO</h1>
+            <h2 id="templateProgramName"></h2>
+            <p>EC Infra - Gestão Ambiental Portuária</p>
+            <p>Data de Geração: <span id="templateDate"></span></p>
+        </div>
+
+        <div class="template-section">
+            <h3>1. IDENTIFICAÇÃO DO PROGRAMA</h3>
+            <p><strong>Nome:</strong> <span id="templateName"></span></p>
+            <p><strong>Categoria:</strong> <span id="templateCategory"></span></p>
+            <p><strong>Responsável Técnico:</strong> <span id="templateResponsible"></span></p>
+            <p><strong>Data de Início:</strong> <span id="templateStartDate"></span></p>
+            <p><strong>Frequência de Monitoramento:</strong> <span id="templateFrequency"></span></p>
+        </div>
+
+        <div class="template-section">
+            <h3>2. DESCRIÇÃO E OBJETIVOS</h3>
+            <p id="templateDescription"></p>
+        </div>
+
+        <div class="template-section">
+            <h3>3. INDICADORES DE MONITORAMENTO</h3>
+            <table class="template-table" id="templateIndicatorsTable">
+                <thead>
+                    <tr>
+                        <th>Indicador</th>
+                        <th>Unidade</th>
+                        <th>Meta</th>
+                        <th>Frequência</th>
+                    </tr>
+                </thead>
+                <tbody id="templateIndicatorsBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="template-section">
+            <h3>4. CRONOGRAMA DE EXECUÇÃO</h3>
+            <p>Este programa será executado conforme cronograma estabelecido, com monitoramento <span id="templateFrequencyText"></span> dos indicadores definidos.</p>
+        </div>
+
+        <div class="template-section">
+            <h3>5. RESPONSABILIDADES</h3>
+            <p>O responsável técnico <span id="templateResponsibleText"></span> será encarregado da execução, monitoramento e elaboração de relatórios deste programa.</p>
+        </div>
+
+        <div class="template-section">
+            <h3>6. RELATÓRIOS E DOCUMENTAÇÃO</h3>
+            <p>Serão elaborados relatórios periódicos conforme a frequência estabelecida, contendo:</p>
+            <ul>
+                <li>Resultados das medições realizadas</li>
+                <li>Análise de conformidade com as metas estabelecidas</li>
+                <li>Identificação de não conformidades e ações corretivas</li>
+                <li>Recomendações para melhoria contínua</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Global data
+        let programs = [
+            {
+                id: 1,
+                name: "PQAA - Programa de Qualidade das Águas",
+                description: "Monitoramento contínuo da qualidade da água portuária",
+                category: "basico",
+                responsible: "Eng. Maria Silva",
+                status: "conforme",
+                startDate: "2024-01-15",
+                frequency: "mensal",
+                indicators: [
+                    { name: "pH", value: 7.2, target: "6.5-8.5", unit: "", frequency: "mensal" },
+                    { name: "Oxigênio Dissolvido", value: 6.8, target: ">5.0", unit: "mg/L", frequency: "mensal" }
+                ]
+            },
+            {
+                id: 2,
+                name: "PCA - Programa de Controle Ambiental",
+                description: "Controle de ruído, vibração e emissões atmosféricas",
+                category: "basico",
+                responsible: "Eng. João Santos",
+                status: "atencao",
+                startDate: "2024-02-01",
+                frequency: "mensal",
+                indicators: [
+                    { name: "Ruído", value: 62, target: "≤65", unit: "dB(A)", frequency: "semanal" },
+                    { name: "PM2.5", value: 18.5, target: "≤25", unit: "μg/m³", frequency: "mensal" }
+                ]
+            }
+        ];
+
+        let measurements = [
+            {
+                id: 1,
+                programId: 1,
+                programName: "PQAA - Programa de Qualidade das Águas",
+                indicator: "pH",
+                scheduledDate: "2024-11-25",
+                status: "agendado",
+                result: null,
+                conformity: null,
+                observations: ""
+            },
+            {
+                id: 2,
+                programId: 2,
+                programName: "PCA - Programa de Controle Ambiental",
+                indicator: "Ruído",
+                scheduledDate: "2024-11-20",
+                status: "atrasado",
+                result: null,
+                conformity: null,
+                observations: ""
+            },
+            {
+                id: 3,
+                programId: 1,
+                programName: "PQAA - Programa de Qualidade das Águas",
+                indicator: "Oxigênio Dissolvido",
+                scheduledDate: "2024-11-22",
+                status: "realizado",
+                result: 6.8,
+                conformity: "conforme",
+                observations: "Medição realizada conforme procedimento"
+            }
+        ];
+
+        let idaData = {
+            ambiental: {
+                score: 8.7,
+                components: [
+                    { name: "Gestão de Resíduos Sólidos", score: 9.2, detail: "Taxa de reciclagem: 87% | Meta: ≥80%" },
+                    { name: "Qualidade do Ar", score: 8.5, detail: "PM2.5: 18.5 μg/m³ | Limite: ≤25 μg/m³" },
+                    { name: "Qualidade da Água", score: 8.8, detail: "IQA: 8.8 | Classificação: Boa" },
+                    { name: "Controle de Ruído", score: 8.1, detail: "Nível médio: 62 dB(A) | Limite: ≤65 dB(A)" },
+                    { name: "Eficiência Energética", score: 8.9, detail: "Redução consumo: 12% | Meta: ≥10%" }
+                ]
+            },
+            social: {
+                score: 8.5,
+                components: [
+                    { name: "Educação Ambiental", score: 8.9, detail: "Participantes treinados: 245 | Meta: ≥200" },
+                    { name: "Comunicação Social", score: 8.3, detail: "Campanhas realizadas: 12 | Meta: ≥10" },
+                    { name: "Participação Comunitária", score: 7.8, detail: "Reuniões públicas: 6 | Meta: ≥8" },
+                    { name: "Transparência", score: 9.1, detail: "Relatórios publicados: 100% | Meta: 100%" }
+                ]
+            }
+        };
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            setupTabNavigation();
+            initializeCharts();
+            renderPrograms();
+            renderIDAComponents();
+            calculateIDA();
+            renderMeasurements();
+            updateDashboardStats();
+            populateFilterPrograms();
+        });
+
+        function setupTabNavigation() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.getAttribute('data-tab');
+                    
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                        btn.classList.add('border-transparent', 'text-gray-600');
+                    });
+                    button.classList.add('active', 'border-blue-500', 'text-blue-600');
+                    button.classList.remove('border-transparent', 'text-gray-600');
+                    
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(targetTab).classList.remove('hidden');
+                });
+            });
+        }
+
+        function initializeCharts() {
+            // IDA Evolution Chart
+            const idaCtx = document.getElementById('idaEvolutionChart');
+            if (idaCtx) {
+                new Chart(idaCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023', 'Q1 2024', 'Q2 2024', 'Q3 2024'],
+                        datasets: [{
+                            label: 'IDA ANTAQ',
+                            data: [8.1, 8.2, 8.0, 8.3, 8.4, 8.6, 8.73],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white'
+                            }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: false, 
+                                min: 7, 
+                                max: 10,
+                                grid: { color: 'rgba(0,0,0,0.1)' },
+                                ticks: { color: '#666' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0,0,0,0.1)' },
+                                ticks: { color: '#666' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Programs Status Chart
+            const programsCtx = document.getElementById('programsStatusChart');
+            if (programsCtx) {
+                new Chart(programsCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Conformes', 'Atenção', 'Críticos'],
+                        datasets: [{
+                            data: [21, 1, 1],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { 
+                                    padding: 20, 
+                                    usePointStyle: true,
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // IDA History Chart
+            const idaHistoryCtx = document.getElementById('idaHistoryChart');
+            if (idaHistoryCtx) {
+                new Chart(idaHistoryCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        datasets: [
+                            {
+                                label: 'Dimensão Ambiental',
+                                data: [8.3, 8.4, 8.2, 8.5, 8.6, 8.7, 8.8, 8.6, 8.7, 8.8, 8.7, 8.7],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Dimensão Social',
+                                data: [8.0, 8.1, 7.9, 8.2, 8.3, 8.4, 8.5, 8.3, 8.4, 8.5, 8.5, 8.5],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'IDA Final',
+                                data: [8.18, 8.28, 8.08, 8.38, 8.48, 8.58, 8.68, 8.48, 8.58, 8.68, 8.63, 8.73],
+                                borderColor: '#8b5cf6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                tension: 0.4,
+                                borderWidth: 3,
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { 
+                                position: 'top',
+                                labels: { font: { size: 12 } }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleColor: 'white',
+                                bodyColor: 'white'
+                            }
+                        },
+                        scales: { 
+                            y: { 
+                                beginAtZero: false, 
+                                min: 7, 
+                                max: 10,
+                                grid: { color: 'rgba(0,0,0,0.1)' },
+                                ticks: { color: '#666' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0,0,0,0.1)' },
+                                ticks: { color: '#666' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderPrograms() {
+            const programsList = document.getElementById('programsList');
+            if (!programsList) return;
+
+            programsList.innerHTML = programs.map(program => `
+                <div class="program-card bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800">${program.name}</h4>
+                            <p class="text-gray-600 text-sm">${program.description}</p>
+                        </div>
+                        <span class="status-indicator status-${program.status}"></span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">Responsável</p>
+                            <p class="font-medium">${program.responsible}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide">Frequência</p>
+                            <p class="font-medium">${program.frequency}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="bg-${program.status === 'conforme' ? 'green' : program.status === 'atencao' ? 'orange' : 'red'}-100 text-${program.status === 'conforme' ? 'green' : program.status === 'atencao' ? 'orange' : 'red'}-800 px-3 py-1 rounded-full text-xs font-medium">
+                            ${program.status === 'conforme' ? 'Conforme' : program.status === 'atencao' ? 'Atenção' : 'Crítico'}
+                        </span>
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800" onclick="viewProgramDetails(${program.id})" title="Ver Detalhes">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="text-gray-600 hover:text-gray-800" onclick="editProgram(${program.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMeasurements() {
+            const measurementsTable = document.getElementById('measurementsTable');
+            if (!measurementsTable) return;
+
+            measurementsTable.innerHTML = measurements.map(measurement => {
+                const statusClass = measurement.status === 'realizado' ? 'green' : 
+                                  measurement.status === 'atrasado' ? 'red' : 'yellow';
+                const conformityClass = measurement.conformity === 'conforme' ? 'green' : 
+                                      measurement.conformity === 'nao_conforme' ? 'red' : 'gray';
+                
+                return `
+                    <tr class="measurement-row">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${measurement.programName}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${measurement.indicator}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${new Date(measurement.scheduledDate).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${statusClass}-100 text-${statusClass}-800">
+                                ${measurement.status === 'realizado' ? 'Realizado' : 
+                                  measurement.status === 'atrasado' ? 'Atrasado' : 'Agendado'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${measurement.result || '-'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${measurement.conformity ? 
+                                `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${conformityClass}-100 text-${conformityClass}-800">
+                                    ${measurement.conformity === 'conforme' ? 'Conforme' : 'Não Conforme'}
+                                </span>` : '-'
+                            }
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-blue-600 hover:text-blue-900 mr-2" onclick="editMeasurement(${measurement.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-900" onclick="deleteMeasurement(${measurement.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderIDAComponents() {
+            // Render Ambiental Components
+            const ambientalContainer = document.getElementById('ambientalComponents');
+            if (ambientalContainer) {
+                ambientalContainer.innerHTML = idaData.ambiental.components.map(comp => `
+                    <div class="ida-component">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-gray-700">${comp.name}</span>
+                            <span class="font-bold text-${comp.score >= 8.5 ? 'green' : comp.score >= 7.5 ? 'yellow' : 'red'}-600">${comp.score}</span>
+                        </div>
+                        <div class="bg-gray-200 rounded-full h-3">
+                            <div class="bg-${comp.score >= 8.5 ? 'green' : comp.score >= 7.5 ? 'yellow' : 'red'}-500 h-3 rounded-full" style="width: ${comp.score * 10}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">${comp.detail}</p>
+                    </div>
+                `).join('');
+            }
+
+            // Render Social Components
+            const socialContainer = document.getElementById('socialComponents');
+            if (socialContainer) {
+                socialContainer.innerHTML = idaData.social.components.map(comp => `
+                    <div class="ida-component">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-gray-700">${comp.name}</span>
+                            <span class="font-bold text-${comp.score >= 8.5 ? 'green' : comp.score >= 7.5 ? 'yellow' : 'red'}-600">${comp.score}</span>
+                        </div>
+                        <div class="bg-gray-200 rounded-full h-3">
+                            <div class="bg-${comp.score >= 8.5 ? 'green' : comp.score >= 7.5 ? 'yellow' : 'red'}-500 h-3 rounded-full" style="width: ${comp.score * 10}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">${comp.detail}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function calculateIDA() {
+            const ambientalScore = idaData.ambiental.score;
+            const socialScore = idaData.social.score;
+            const ambientalContrib = ambientalScore * 0.6;
+            const socialContrib = socialScore * 0.4;
+            const bonus = (ambientalScore > 8.5 && socialScore > 8.5) ? 0.11 : 0;
+            const finalIDA = ambientalContrib + socialContrib + bonus;
+
+            // Update all IDA displays
+            const elements = [
+                'currentIDA', 'dashboardIDA', 'calcFinalIDA'
+            ];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = finalIDA.toFixed(2);
+            });
+
+            const scoreElements = [
+                { id: 'ambientalScore', value: ambientalScore },
+                { id: 'socialScore', value: socialScore },
+                { id: 'calcAmbientalScore', value: ambientalScore },
+                { id: 'calcSocialScore', value: socialScore }
+            ];
+            scoreElements.forEach(item => {
+                const element = document.getElementById(item.id);
+                if (element) element.textContent = item.value.toFixed(1);
+            });
+
+            const contribElements = [
+                { id: 'ambientalContrib', value: ambientalContrib },
+                { id: 'socialContrib', value: socialContrib }
+            ];
+            contribElements.forEach(item => {
+                const element = document.getElementById(item.id);
+                if (element) element.textContent = item.value.toFixed(2);
+            });
+
+            const formulaElement = document.getElementById('calcFormula');
+            if (formulaElement) {
+                formulaElement.textContent = `${ambientalContrib.toFixed(2)} + ${socialContrib.toFixed(2)} + ${bonus.toFixed(2)}`;
+            }
+        }
+
+        function updateDashboardStats() {
+            const totalPrograms = programs.length;
+            const conformePrograms = programs.filter(p => p.status === 'conforme').length;
+            const pendingMeasurements = measurements.filter(m => m.status !== 'realizado').length;
+            const overdueMeasurements = measurements.filter(m => m.status === 'atrasado').length;
+            
+            const elements = [
+                { id: 'totalPrograms', value: totalPrograms },
+                { id: 'conformePrograms', value: conformePrograms },
+                { id: 'pendingMeasurements', value: pendingMeasurements },
+                { id: 'overdueMeasurements', value: overdueMeasurements }
+            ];
+
+            elements.forEach(item => {
+                const element = document.getElementById(item.id);
+                if (element) element.textContent = item.value;
+            });
+        }
+
+        function populateFilterPrograms() {
+            const filterProgram = document.getElementById('filterProgram');
+            const measurementProgram = document.getElementById('measurementProgram');
+            
+            if (filterProgram) {
+                filterProgram.innerHTML = '<option value="">Todos os programas</option>' +
+                    programs.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+            
+            if (measurementProgram) {
+                measurementProgram.innerHTML = '<option value="">Selecione um programa...</option>' +
+                    programs.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            }
+        }
+
+        // Program Modal Functions
+        function openProgramModal() {
+            document.getElementById('programModal').classList.add('active');
+        }
+
+        function closeProgramModal() {
+            document.getElementById('programModal').classList.remove('active');
+            document.getElementById('programForm').reset();
+        }
+
+        function loadTemplate() {
+            const template = document.getElementById('programTemplate').value;
+            const templates = {
+                pqaa: {
+                    name: "PQAA - Programa de Qualidade das Águas",
+                    description: "Monitoramento contínuo da qualidade da água portuária, incluindo análises físico-químicas e biológicas para garantir conformidade com padrões ambientais.",
+                    indicators: [
+                        { name: "pH", unit: "", target: "6.5-8.5", frequency: "mensal" },
+                        { name: "Oxigênio Dissolvido", unit: "mg/L", target: ">5.0", frequency: "mensal" },
+                        { name: "DBO", unit: "mg/L", target: "≤5.0", frequency: "mensal" },
+                        { name: "Coliformes Termotolerantes", unit: "NMP/100mL", target: "≤1000", frequency: "mensal" }
+                    ]
+                },
+                pmqa: {
+                    name: "PMQA - Programa de Monitoramento da Qualidade do Ar",
+                    description: "Monitoramento contínuo da qualidade do ar na área portuária, com foco em material particulado e gases poluentes.",
+                    indicators: [
+                        { name: "PM2.5", unit: "μg/m³", target: "≤25", frequency: "mensal" },
+                        { name: "PM10", unit: "μg/m³", target: "≤50", frequency: "mensal" },
+                        { name: "SO2", unit: "μg/m³", target: "≤20", frequency: "mensal" },
+                        { name: "NO2", unit: "μg/m³", target: "≤40", frequency: "mensal" }
+                    ]
+                },
+                pgrs: {
+                    name: "PGRS - Plano de Gerenciamento de Resíduos Sólidos",
+                    description: "Gestão integrada de resíduos sólidos portuários, incluindo coleta, tratamento e destinação adequada.",
+                    indicators: [
+                        { name: "Taxa de Reciclagem", unit: "%", target: "≥80", frequency: "mensal" },
+                        { name: "Resíduos Perigosos", unit: "ton/mês", target: "≤5", frequency: "mensal" },
+                        { name: "Resíduos Orgânicos", unit: "ton/mês", target: "Compostagem 100%", frequency: "mensal" }
+                    ]
+                },
+                pca: {
+                    name: "PCA - Programa de Controle Ambiental",
+                    description: "Controle e monitoramento de ruído, vibração e emissões atmosféricas nas operações portuárias.",
+                    indicators: [
+                        { name: "Ruído", unit: "dB(A)", target: "≤65", frequency: "semanal" },
+                        { name: "Vibração", unit: "mm/s", target: "≤2.5", frequency: "mensal" },
+                        { name: "Material Particulado", unit: "μg/m³", target: "≤50", frequency: "mensal" }
+                    ]
+                }
+            };
+
+            if (templates[template]) {
+                const t = templates[template];
+                document.getElementById('programName').value = t.name;
+                document.getElementById('programDescription').value = t.description;
+                
+                // Clear existing indicators and add template indicators
+                const indicatorsList = document.getElementById('indicatorsList');
+                indicatorsList.innerHTML = '';
+                t.indicators.forEach(indicator => {
+                    addIndicatorWithData(indicator);
+                });
+            }
+        }
+
+        function addIndicator() {
+            addIndicatorWithData({});
+        }
+
+        function addIndicatorWithData(data = {}) {
+            const indicatorsList = document.getElementById('indicatorsList');
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'indicator-item grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 p-4 bg-white rounded-lg border';
+            indicatorDiv.innerHTML = `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Indicador</label>
+                    <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" placeholder="Nome do indicador" value="${data.name || ''}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Unidade</label>
+                    <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" placeholder="Ex: mg/L, dB(A), %" value="${data.unit || ''}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Meta</label>
+                    <input type="text" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500" placeholder="Valor meta" value="${data.target || ''}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Frequência</label>
+                    <select class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500">
+                        <option value="semanal" ${data.frequency === 'semanal' ? 'selected' : ''}>Semanal</option>
+                        <option value="mensal" ${data.frequency === 'mensal' ? 'selected' : ''}>Mensal</option>
+                        <option value="bimestral" ${data.frequency === 'bimestral' ? 'selected' : ''}>Bimestral</option>
+                        <option value="trimestral" ${data.frequency === 'trimestral' ? 'selected' : ''}>Trimestral</option>
+                        <option value="semestral" ${data.frequency === 'semestral' ? 'selected' : ''}>Semestral</option>
+                        <option value="anual" ${data.frequency === 'anual' ? 'selected' : ''}>Anual</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="button" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600" onclick="removeIndicator(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            indicatorsList.appendChild(indicatorDiv);
+        }
+
+        function removeIndicator(button) {
+            button.closest('.indicator-item').remove();
+        }
+
+        // Program Form Submission
+        document.getElementById('programForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const programData = {
+                id: programs.length + 1,
+                name: document.getElementById('programName').value,
+                description: document.getElementById('programDescription').value,
+                category: document.getElementById('programCategory').value,
+                responsible: document.getElementById('programResponsible').value,
+                status: 'conforme',
+                startDate: document.getElementById('programStartDate').value,
+                frequency: document.getElementById('programFrequency').value,
+                indicators: []
+            };
+
+            // Collect indicators
+            const indicatorItems = document.querySelectorAll('.indicator-item');
+            indicatorItems.forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                const select = item.querySelector('select');
+                if (inputs[0].value) {
+                    programData.indicators.push({
+                        name: inputs[0].value,
+                        unit: inputs[1].value,
+                        target: inputs[2].value,
+                        frequency: select.value,
+                        value: 0
+                    });
+                }
+            });
+
+            programs.push(programData);
+            renderPrograms();
+            updateDashboardStats();
+            populateFilterPrograms();
+            closeProgramModal();
+            
+            // Show success message
+            alert('Programa criado com sucesso!');
+        });
+
+        // Measurement Modal Functions
+        function addMeasurement() {
+            document.getElementById('measurementModal').classList.add('active');
+            document.getElementById('measurementDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function closeMeasurementModal() {
+            document.getElementById('measurementModal').classList.remove('active');
+            document.getElementById('measurementForm').reset();
+        }
+
+        function loadProgramIndicators() {
+            const programId = parseInt(document.getElementById('measurementProgram').value);
+            const indicatorSelect = document.getElementById('measurementIndicator');
+            
+            if (programId) {
+                const program = programs.find(p => p.id === programId);
+                if (program) {
+                    indicatorSelect.innerHTML = '<option value="">Selecione um indicador...</option>' +
+                        program.indicators.map(ind => `<option value="${ind.name}">${ind.name} (${ind.unit})</option>`).join('');
+                }
+            } else {
+                indicatorSelect.innerHTML = '<option value="">Selecione um indicador...</option>';
+            }
+        }
+
+        // Measurement Form Submission
+        document.getElementById('measurementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const programId = parseInt(document.getElementById('measurementProgram').value);
+            const program = programs.find(p => p.id === programId);
+            
+            const measurementData = {
+                id: measurements.length + 1,
+                programId: programId,
+                programName: program.name,
+                indicator: document.getElementById('measurementIndicator').value,
+                scheduledDate: document.getElementById('measurementDate').value,
+                status: 'realizado',
+                result: parseFloat(document.getElementById('measurementValue').value),
+                conformity: 'conforme', // This would be calculated based on target values
+                observations: document.getElementById('measurementObservations').value
+            };
+
+            measurements.push(measurementData);
+            renderMeasurements();
+            updateDashboardStats();
+            closeMeasurementModal();
+            
+            alert('Medição registrada com sucesso!');
+        });
+
+        // Schedule Analysis Functions
+        function scheduleAnalysis() {
+            document.getElementById('scheduleAnalysisModal').classList.add('active');
+            populateSchedulePrograms();
+        }
+
+        function closeScheduleAnalysisModal() {
+            document.getElementById('scheduleAnalysisModal').classList.remove('active');
+            document.getElementById('scheduleAnalysisForm').reset();
+        }
+
+        function loadScheduleIndicators() {
+            const programId = parseInt(document.getElementById('scheduleProgram').value);
+            const indicatorSelect = document.getElementById('scheduleIndicator');
+            
+            if (programId) {
+                const program = programs.find(p => p.id === programId);
+                if (program) {
+                    indicatorSelect.innerHTML = '<option value="">Selecione um indicador...</option>' +
+                        program.indicators.map(ind => `<option value="${ind.name}">${ind.name} (${ind.unit})</option>`).join('');
+                }
+            } else {
+                indicatorSelect.innerHTML = '<option value="">Selecione um indicador...</option>';
+            }
+        }
+
+        function populateSchedulePrograms() {
+            const scheduleProgram = document.getElementById('scheduleProgram');
+            const reportProgram = document.getElementById('reportProgram');
+            const exportProgram = document.getElementById('exportProgram');
+            
+            const programOptions = programs.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            
+            if (scheduleProgram) {
+                scheduleProgram.innerHTML = '<option value="">Selecione um programa...</option>' + programOptions;
+            }
+            if (reportProgram) {
+                reportProgram.innerHTML = '<option value="">Selecione um programa...</option>' + programOptions;
+            }
+            if (exportProgram) {
+                exportProgram.innerHTML = '<option value="">Todos os programas</option>' + programOptions;
+            }
+        }
+
+        // Schedule Report Functions
+        function scheduleReport() {
+            document.getElementById('scheduleReportModal').classList.add('active');
+            populateSchedulePrograms();
+        }
+
+        function closeScheduleReportModal() {
+            document.getElementById('scheduleReportModal').classList.remove('active');
+            document.getElementById('scheduleReportForm').reset();
+        }
+
+        // Export Functions
+        function exportReports() {
+            document.getElementById('exportModal').classList.add('active');
+            populateSchedulePrograms();
+            
+            // Handle custom period toggle
+            document.getElementById('exportPeriod').addEventListener('change', function() {
+                const customPeriod = document.getElementById('customPeriod');
+                if (this.value === 'personalizado') {
+                    customPeriod.classList.remove('hidden');
+                } else {
+                    customPeriod.classList.add('hidden');
+                }
+            });
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        function exportData(format) {
+            const program = document.getElementById('exportProgram').value;
+            const period = document.getElementById('exportPeriod').value;
+            
+            let filename = `relatorio_ambiental_${new Date().toISOString().split('T')[0]}`;
+            
+            if (format === 'pdf') {
+                generatePDFReport(program, period);
+            } else if (format === 'excel') {
+                generateExcelReport(program, period);
+            } else if (format === 'word') {
+                generateWordReport(program, period);
+            } else if (format === 'csv') {
+                generateCSVReport(program, period);
+            }
+            
+            closeExportModal();
+        }
+
+        function generatePDFReport(program, period) {
+            // Create a comprehensive PDF report
+            const reportData = generateReportData(program, period);
+            
+            // Create PDF content
+            const content = `
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <div style="text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px;">
+                        <h1>RELATÓRIO AMBIENTAL PORTUÁRIO</h1>
+                        <h2>EC Infra - Gestão Ambiental Portuária</h2>
+                        <p>Período: ${period} | Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h3>1. RESUMO EXECUTIVO</h3>
+                        <p>IDA ANTAQ Atual: <strong>8.73</strong></p>
+                        <p>Programas Ativos: <strong>${programs.length}</strong></p>
+                        <p>Status Geral: <strong>Conforme</strong></p>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h3>2. PROGRAMAS AMBIENTAIS</h3>
+                        ${programs.map(p => `
+                            <div style="margin-bottom: 15px; padding: 10px; border-left: 4px solid #10b981;">
+                                <h4>${p.name}</h4>
+                                <p><strong>Responsável:</strong> ${p.responsible}</p>
+                                <p><strong>Status:</strong> ${p.status === 'conforme' ? 'Conforme' : p.status === 'atencao' ? 'Atenção' : 'Crítico'}</p>
+                                <p><strong>Frequência:</strong> ${p.frequency}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h3>3. MEDIÇÕES REALIZADAS</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #f2f2f2;">
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Programa</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Indicador</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Data</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Resultado</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${measurements.filter(m => m.status === 'realizado').map(m => `
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${m.programName}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${m.indicator}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${new Date(m.scheduledDate).toLocaleDateString('pt-BR')}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${m.result || '-'}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${m.conformity === 'conforme' ? 'Conforme' : 'Não Conforme'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Create and download PDF
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `relatorio_ambiental_${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Relatório PDF gerado com sucesso!');
+        }
+
+        function generateExcelReport(program, period) {
+            // Generate CSV data that can be opened in Excel
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Programa,Indicador,Data,Resultado,Conformidade,Observações\n";
+            
+            measurements.forEach(m => {
+                csvContent += `"${m.programName}","${m.indicator}","${new Date(m.scheduledDate).toLocaleDateString('pt-BR')}","${m.result || ''}","${m.conformity || ''}","${m.observations || ''}"\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `dados_ambientais_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Planilha Excel gerada com sucesso!');
+        }
+
+        function generateWordReport(program, period) {
+            const content = `
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>Relatório Ambiental Portuário</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1>RELATÓRIO AMBIENTAL PORTUÁRIO</h1>
+                        <h2>EC Infra - Gestão Ambiental Portuária</h2>
+                        <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    
+                    <h3>1. RESUMO EXECUTIVO</h3>
+                    <p>Este relatório apresenta o status atual dos programas ambientais portuários.</p>
+                    <p><strong>IDA ANTAQ:</strong> 8.73</p>
+                    <p><strong>Programas Ativos:</strong> ${programs.length}</p>
+                    
+                    <h3>2. PROGRAMAS MONITORADOS</h3>
+                    ${programs.map(p => `
+                        <h4>${p.name}</h4>
+                        <p><strong>Descrição:</strong> ${p.description}</p>
+                        <p><strong>Responsável:</strong> ${p.responsible}</p>
+                        <p><strong>Status:</strong> ${p.status === 'conforme' ? 'Conforme' : p.status === 'atencao' ? 'Atenção' : 'Crítico'}</p>
+                    `).join('')}
+                    
+                    <h3>3. CONCLUSÕES</h3>
+                    <p>Os programas ambientais estão sendo executados conforme planejado, mantendo o alto padrão de desempenho ambiental.</p>
+                </body>
+                </html>
+            `;
+            
+            const blob = new Blob([content], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `relatorio_ambiental_${new Date().toISOString().split('T')[0]}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Documento Word gerado com sucesso!');
+        }
+
+        function generateCSVReport(program, period) {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Programa,Indicador,Data Prevista,Status,Resultado,Conformidade\n";
+            
+            measurements.forEach(m => {
+                csvContent += `"${m.programName}","${m.indicator}","${new Date(m.scheduledDate).toLocaleDateString('pt-BR')}","${m.status}","${m.result || ''}","${m.conformity || ''}"\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `dados_medicoes_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('Arquivo CSV gerado com sucesso!');
+        }
+
+        function generateReportData(program, period) {
+            // This would generate comprehensive report data based on filters
+            return {
+                programs: program ? programs.filter(p => p.id == program) : programs,
+                measurements: measurements,
+                period: period
+            };
+        }
+
+        function exportToPDF(programName) {
+            const template = document.getElementById('exportTemplate');
+            template.style.display = 'block';
+            template.style.position = 'static';
+            
+            html2canvas(template, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(`${programName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+                
+                template.style.display = 'none';
+                template.style.position = 'absolute';
+            });
+        }
+
+        function exportToWord(programName) {
+            const template = document.getElementById('exportTemplate');
+            const content = template.innerHTML;
+            
+            const blob = new Blob([`
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .template-header { text-align: center; border-bottom: 2px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+                        .template-section { margin-bottom: 25px; }
+                        .template-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+                        .template-table th, .template-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        .template-table th { background-color: #f2f2f2; font-weight: bold; }
+                    </style>
+                </head>
+                <body>${content}</body>
+                </html>
+            `], { type: 'application/msword' });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${programName.replace(/[^a-zA-Z0-9]/g, '_')}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Filter Functions
+        function applyFilters() {
+            // This would filter the measurements table based on selected criteria
+            alert('Filtros aplicados! (Funcionalidade completa seria implementada aqui)');
+        }
+
+        function generateReport() {
+            alert('Relatório será gerado! (Funcionalidade completa seria implementada aqui)');
+        }
+
+        // Edit Functions
+        function editProgram(id) {
+            alert('Funcionalidade de edição será implementada em breve!');
+        }
+
+        function editMeasurement(id) {
+            alert('Funcionalidade de edição de medição será implementada em breve!');
+        }
+
+        function deleteMeasurement(id) {
+            if (confirm('Tem certeza que deseja excluir esta medição?')) {
+                measurements = measurements.filter(m => m.id !== id);
+                renderMeasurements();
+                updateDashboardStats();
+            }
+        }
+
+        // Schedule Analysis Form Submission
+        document.getElementById('scheduleAnalysisForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const scheduleData = {
+                id: measurements.length + 1,
+                programId: parseInt(document.getElementById('scheduleProgram').value),
+                programName: programs.find(p => p.id === parseInt(document.getElementById('scheduleProgram').value))?.name || '',
+                indicator: document.getElementById('scheduleIndicator').value,
+                scheduledDate: document.getElementById('scheduleDate').value,
+                scheduledTime: document.getElementById('scheduleTime').value,
+                analysisType: document.getElementById('analysisType').value,
+                responsible: document.getElementById('scheduleResponsible').value,
+                laboratory: document.getElementById('scheduleLab').value,
+                collectionPoints: document.getElementById('schedulePoints').value,
+                status: 'agendado',
+                result: null,
+                conformity: null,
+                observations: document.getElementById('scheduleObservations').value
+            };
+
+            measurements.push(scheduleData);
+            renderMeasurements();
+            updateDashboardStats();
+            closeScheduleAnalysisModal();
+            
+            alert('Análise agendada com sucesso!');
+        });
+
+        // Schedule Report Form Submission
+        document.getElementById('scheduleReportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const reportData = {
+                id: Date.now(),
+                programId: parseInt(document.getElementById('reportProgram').value),
+                programName: programs.find(p => p.id === parseInt(document.getElementById('reportProgram').value))?.name || '',
+                reportType: document.getElementById('reportType').value,
+                deadline: document.getElementById('reportDeadline').value,
+                responsible: document.getElementById('reportResponsible').value,
+                periodStart: document.getElementById('reportPeriodStart').value,
+                periodEnd: document.getElementById('reportPeriodEnd').value,
+                recipients: Array.from(document.querySelectorAll('#scheduleReportForm input[type="checkbox"]:checked')).map(cb => cb.value),
+                observations: document.getElementById('reportObservations').value,
+                status: 'agendado'
+            };
+
+            // In a real application, this would be stored in a reports array
+            console.log('Relatório agendado:', reportData);
+            closeScheduleReportModal();
+            
+            alert('Relatório agendado com sucesso!');
+        });
+
+        // View Program Details Function
+        function viewProgramDetails(programId) {
+            const program = programs.find(p => p.id === programId);
+            if (!program) return;
+            
+            alert(`Detalhes do Programa:\n\nNome: ${program.name}\nDescrição: ${program.description}\nResponsável: ${program.responsible}\nStatus: ${program.status}\nFrequência: ${program.frequency}\n\nIndicadores: ${program.indicators.length} configurados`);
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('programModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProgramModal();
+            }
+        });
+
+        document.getElementById('measurementModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeMeasurementModal();
+            }
+        });
+
+        document.getElementById('scheduleAnalysisModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeScheduleAnalysisModal();
+            }
+        });
+
+        document.getElementById('scheduleReportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeScheduleReportModal();
+            }
+        });
+
+        document.getElementById('exportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExportModal();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96a24629a78f82eb',t:'MTc1NDM1NDc1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

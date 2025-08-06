@@ -77,13 +77,13 @@ const tableReceitaData = [
 export default function FinanceiroPage() {
     return (
         <div className="px-15 py-10 space-y-10">
-            <h1 className="text-2xl font-bold animate__animated animate__backInUp">
+            <h1 className="text-2xl">
                 Gestão Financeira
             </h1>
-            <div className="font-bold animate__animated animate__backInUp">
+            <div className="font-bold">
                 <FinancialCard data={financialData} />
             </div>
-            <div className="font-bold animate__animated animate__backInUp animate__delay-1s flex gap-10">
+            <div className="font-bold flex ga">
                 <div className="w-1/2">
                     <DonutChart
                         title="Composição de Custos"
@@ -106,7 +106,7 @@ export default function FinanceiroPage() {
             </div>
 
             {/* Cards alinhados e responsivos */}
-            <div className="animate__animated animate__backInUp animate__delay-1s flex gap-10 items-stretch h-[360px]">
+            <div className="flex gap-10 items-stretch h-[360px]">
                 <div className="w-1/2 flex flex-col h-full">
                     <ReceitaPorTabela data={tableReceitaData} tipo_tabela="Tabela" />
                 </div>
@@ -114,7 +114,7 @@ export default function FinanceiroPage() {
                     <IndicadoresChave />
                 </div>
             </div>
-            <div className="animate__animated animate__backInUp animate__delay-1s flex gap-10 items-stretch h-[360px]">
+            <div className="flex gap-10 items-stretch h-[360px]">
                 <div className="w-1/2 flex flex-col h-full">
                     <ReceitaPorTabela data={tableReceitaData} tipo_tabela="Cliente" />
                 </div>
