@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnchor, faBell, faCalendarAlt, faClock } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import 'animate.css';
+import { Button } from "./ui/button";
+import { NewProgram } from "./addActive";
 
 export function AppNav() {
     return (
@@ -31,10 +33,12 @@ export function AppNav() {
                 </div>
                 <FontAwesomeIcon icon={faBell} className="text-gray-400 w-5 h-5 cursor-pointer" />
 
+                <NewProgram />
+
                 <Avatar>
                     <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">AD</AvatarFallback>
                 </Avatar>
             </div>
-        </nav>
+        </nav >
     )
 }
