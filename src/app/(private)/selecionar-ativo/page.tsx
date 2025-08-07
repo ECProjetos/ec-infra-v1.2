@@ -6,6 +6,8 @@ import { AtivoCreationType } from "@/app/types/ativos/ativos";
 import { AtivoCard } from "@/components/selecionar-ativo/ativoCard";
 import { getAtivos } from "@/app/actions/ativos/ativo";
 import { getUserSession } from "@/app/(auth)/actions";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function SelecionarAtivo() {
     const [ativos, setAtivos] = useState<AtivoCreationType[]>([]);
@@ -38,7 +40,14 @@ export default function SelecionarAtivo() {
 
     return (
         <div className="p-20">
-            <h1 className="text-3xl font-bold mb-8">Seus ativos de infraestrutura</h1>
+            <div className="flex justify-between">
+                <h1 className="text-3xl font-bold mb-8">Seus ativos de infraestrutura</h1>
+                <Link href={'/cadastrar-ativo'}>
+                    <Button className="bg-blue-600">
+                        Cadastrar ativo
+                    </Button>
+                </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {ativos.map((ativo, idx) => (
                     <AtivoCard
