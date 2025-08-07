@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 export default function PrivateLayout({ children }: { children: ReactNode }) {
     const pathname = usePathname();
-    const shouldShowSidebar = pathname !== '/selecionar-ativo' && pathname !== '/cadastrar-ativo';
+    const shouldShowSidebar = pathname !== '/selecionar-ativo' && pathname !== '/cadastrar-ativo' && pathname !== '/cadastrar-usuario';
 
     return (
         <div>

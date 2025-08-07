@@ -22,6 +22,7 @@ import { EquipamentoRepeater } from "./equipRepeater";
 import { useActionState, useEffect } from "react";
 import { ConfigAtivo } from "@/app/actions/ativos/configAtivo";
 import { toast } from "sonner";
+import { useAtivoStore } from "@/stores/useAtivoStore";
 
 const initialState = { success: false, error: null as string | null };
 
@@ -33,6 +34,9 @@ export function CadastroTerminalPortuarioDialog() {
         },
         initialState
     );
+    const asset = useAtivoStore()
+    const assetId = asset.ativo?.id;
+
     useEffect(() => {
         if (state.success) {
             toast.success("Ativo configurado com sucesso!");
@@ -41,6 +45,7 @@ export function CadastroTerminalPortuarioDialog() {
             toast.error(`Erro ao configurar ativo: ${state.error}`);
         }
     }, [state]);
+
 
 
     return (
@@ -53,6 +58,7 @@ export function CadastroTerminalPortuarioDialog() {
 
             <DialogContent className="!max-w-5xl max-h-[85vh] overflow-y-auto">
                 <form className="space-y-8 p-4" action={formAction}>
+                    <input type="hidden" name="id" value={assetId ?? ""} />
                     <DialogHeader className="sticky top-0 bg-white z-10">
                         <DialogTitle className="text-xl font-bold">
                             Cadastro de Terminal Portuário
@@ -76,7 +82,7 @@ export function CadastroTerminalPortuarioDialog() {
                     {/* 2. Informações Legais */}
                     <Section title="⚖️ Informações Legais" color="green">
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <InputGroup label="CNPJ da Concessionária" name="cnpj" />
+                            <InputGroup label="CNPJ" name="cnpj" />
                             <InputGroup label="Razão Social" name="corporateName" />
                             <InputGroup label="Número da Licença de Operação" name="licenseNumber" />
                             <SelectGroup label="Órgão Emissor da Licença" name="issuingAgency" options={["ANTAQ", "IBAMA", "Marinha do Brasil", "ANVISA"]} />

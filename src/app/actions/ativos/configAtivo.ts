@@ -18,6 +18,7 @@ export async function ConfigAtivo(formData: FormData): Promise<any> {
 
     // 2. Map camelCase to snake_case for DB
     const terminalValues = {
+        id: values.id,
         terminal_name: values.terminalName,
         terminal_code: values.terminalCode,
         port_location: values.portLocation,

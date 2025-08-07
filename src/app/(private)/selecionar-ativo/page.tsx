@@ -42,11 +42,18 @@ export default function SelecionarAtivo() {
         <div className="p-20">
             <div className="flex justify-between">
                 <h1 className="text-3xl font-bold mb-8">Seus ativos de infraestrutura</h1>
-                <Link href={'/cadastrar-ativo'}>
-                    <Button className="bg-blue-600">
-                        Cadastrar ativo
-                    </Button>
-                </Link>
+                <div className="space-x-3">
+                    <Link href={'/cadastrar-ativo'}>
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                            Cadastrar ativo
+                        </Button>
+                    </Link>
+                    <Link href={'/cadastrar-usuario'}>
+                        <Button className="bg-blue-600 hover:bg-blue-700">
+                            Cadastrar usuário
+                        </Button>
+                    </Link>
+                </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {ativos.map((ativo, idx) => (

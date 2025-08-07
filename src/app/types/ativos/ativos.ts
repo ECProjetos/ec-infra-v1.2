@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 export const AtivoCreationSchema = z.object({
+    id: z.string().optional(),
     name: z.string(),
     uf: z.string(),
     city: z.string(),

@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 export const ConfigAtivoSchema = z.object({
+    id: z.string(),
     terminalName: z.string().min(1, "Nome obrigatório"),
     terminalCode: z.string().min(1, "Código obrigatório"),
     portLocation: z.string().min(1, "Porto obrigatório"),

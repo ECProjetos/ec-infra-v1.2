@@ -6,6 +6,7 @@ import { useActionState, useEffect, useState } from "react";
 import { CreateAtivo } from "@/app/actions/ativos/ativo";
 import { toast } from 'sonner'
 import { getUserSession } from "@/app/(auth)/actions";
+import Link from "next/link";
 
 const initialState = { success: false, error: null as string | null };
 
@@ -37,7 +38,7 @@ export default function CadastrarAtivoPage() {
 
     return (
         <form className="max-h-[80vh]  p-10 space-y-6 bg-white rounded-xl " action={formAction}>
-            <input type="hidden" name="user_id" value={userId} />
+            <input type="hidden" name="user_id" value={userId ?? ""} />
             <div className="rounded-lg p-4 space-y-4 bg-gray-50 border-l-4 border-blue-600 space-y-3">
                 <h3 className="font-semibold text-lg">Informações Básicas</h3>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -72,9 +73,16 @@ export default function CadastrarAtivoPage() {
                     </div>
                 </div>
             </div>
-            <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700 ">
-                Cadastrar ativo
-            </Button>
+            <div className=" flex space-x-3">
+                <Link href={'/selecionar-ativo'}>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                        Voltar
+                    </Button>
+                </Link>
+                <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700 ">
+                    Cadastrar ativo
+                </Button>
+            </div>
 
         </form>
 
