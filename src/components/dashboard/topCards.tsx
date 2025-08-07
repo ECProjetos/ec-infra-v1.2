@@ -27,7 +27,7 @@ export function TopCards({
                 return (
                     <Card
                         key={idx}
-                        className="rounded-xl px-9 py-4 shadow-sm border border-gray-200 w-full max-w-md transition-transform duration-300 ease-out hover:-translate-y-2"
+                        className="rounded-xl px-9 py-4 shadow-sm border border-gray-200 w-full max-w-md transition-transform duration-300 ease-out hover:-translate-y-2 hover:shadow-xl"
                     >
                         <div className="flex items-start justify-between">
                             <div className="flex flex-col">

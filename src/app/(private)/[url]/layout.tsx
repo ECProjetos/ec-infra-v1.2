@@ -3,7 +3,7 @@
 import { useAtivoAtual } from "@/hooks/use-ativo";
 
 export default function AtivoLayout({ children }: { children: React.ReactNode }) {
-    useAtivoAtual(); // Isso vai buscar e armazenar o ativo atual na store
+    useAtivoAtual();
 
     return (
         <div>

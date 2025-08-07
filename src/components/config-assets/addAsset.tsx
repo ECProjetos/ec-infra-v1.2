@@ -19,8 +19,30 @@ import { UploadKMLKMZ } from "./uploadKML";
 import { BercoRepeater } from "./bercoRepeater";
 import { InfraestruturaRepeater } from "./infraestruturaRepeater";
 import { EquipamentoRepeater } from "./equipRepeater";
+import { useActionState, useEffect } from "react";
+import { ConfigAtivo } from "@/app/actions/ativos/configAtivo";
+import { toast } from "sonner";
+
+const initialState = { success: false, error: null as string | null };
+
 
 export function CadastroTerminalPortuarioDialog() {
+    const [state, formAction] = useActionState(
+        async (prevState: { success: boolean; error: string | null }, formData: FormData) => {
+            return await ConfigAtivo(formData);
+        },
+        initialState
+    );
+    useEffect(() => {
+        if (state.success) {
+            toast.success("Ativo configurado com sucesso!");
+        }
+        if (state.error) {
+            toast.error(`Erro ao configurar ativo: ${state.error}`);
+        }
+    }, [state]);
+
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -30,7 +52,7 @@ export function CadastroTerminalPortuarioDialog() {
             </DialogTrigger>
 
             <DialogContent className="!max-w-5xl max-h-[85vh] overflow-y-auto">
-                <form className="space-y-8 p-4">
+                <form className="space-y-8 p-4" action={formAction}>
                     <DialogHeader className="sticky top-0 bg-white z-10">
                         <DialogTitle className="text-xl font-bold">
                             Cadastro de Terminal Portuário
@@ -40,65 +62,54 @@ export function CadastroTerminalPortuarioDialog() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    {/* 1. Informações Básicas */}
                     <Section title="📋 Informações Básicas" color="blue">
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <InputGroup label="Nome do Terminal" />
-                            <InputGroup label="Código do Terminal" />
-                            <InputGroup label="Porto de Localização" />
-                            <InputGroup label="Data de Inauguração" type="date" />
-                            <SelectGroup
-                                label="Status Operacional"
-                                options={["Ativo", "Inativo", "Em Construção", "Planejado"]}
-                            />
-                            <SelectGroup
-                                label="Status no Sistema"
-                                options={["Habilitado", "Desabilitado"]}
-                            />
+                            <InputGroup label="Nome do Terminal" name="terminalName" />
+                            <InputGroup label="Código do Terminal" name="terminalCode" />
+                            <InputGroup label="Porto de Localização" name="portLocation" />
+                            <InputGroup label="Data de Inauguração" name="inaugurationDate" type="date" />
+                            <SelectGroup label="Status Operacional" name="operationalStatus" options={["Ativo", "Inativo", "Em Construção", "Planejado"]} />
+                            <SelectGroup label="Status no Sistema" name="systemStatus" options={["Habilitado", "Desabilitado"]} />
                         </div>
                     </Section>
 
                     {/* 2. Informações Legais */}
                     <Section title="⚖️ Informações Legais" color="green">
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <InputGroup label="CNPJ da Concessionária" />
-                            <InputGroup label="Razão Social" />
-                            <InputGroup label="Número da Licença de Operação" />
-                            <SelectGroup label="Órgão Emissor da Licença" options={["ANTAQ", "IBAMA", "Marinha do Brasil", "ANVISA"]} />
-                            <InputGroup label="Validade da Licença" type="date" />
-                            <SelectGroup label="Certificação ISPS" options={["Sim", "Não", "Em processo"]} />
-                            <SelectGroup label="Regime de Exploração" options={["Concessão", "Autorização", "Arrendamento", "Público"]} />
-                            <InputGroup label="Prazo do Contrato" type="date" />
+                            <InputGroup label="CNPJ da Concessionária" name="cnpj" />
+                            <InputGroup label="Razão Social" name="corporateName" />
+                            <InputGroup label="Número da Licença de Operação" name="licenseNumber" />
+                            <SelectGroup label="Órgão Emissor da Licença" name="issuingAgency" options={["ANTAQ", "IBAMA", "Marinha do Brasil", "ANVISA"]} />
+                            <InputGroup label="Validade da Licença" name="licenseValidity" type="date" />
+                            <SelectGroup label="Certificação ISPS" name="ispsCertification" options={["Sim", "Não", "Em processo"]} />
+                            <SelectGroup label="Regime de Exploração" name="explorationRegime" options={["Concessão", "Autorização", "Arrendamento", "Público"]} />
+                            <InputGroup label="Prazo do Contrato" name="contractTerm" type="date" />
                         </div>
                     </Section>
 
                     {/* 3. Localização */}
                     <Section title="🌍 Localização" color="orange">
                         <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4">
-                            <InputGroup label="Área total (m²)" maxLength={2} />
+                            <InputGroup label="Área total (m²)" name="totalArea" />
                             <UploadKMLKMZ />
-
                         </div>
-                        <BercoRepeater />
-
+                        <BercoRepeater name="berths" />
                     </Section>
 
                     {/* 4. Infraestrutura */}
                     <Section title="⚙️ Infraestrutura" color="purple">
-                        <InfraestruturaRepeater />
+                        <InfraestruturaRepeater name="infrastructure" />
                     </Section>
 
-                    <Section title="🏭  Equipamentos" color="purple">
-                        <EquipamentoRepeater />
+                    <Section title="🏭 Equipamentos" color="purple">
+                        <EquipamentoRepeater name="equipment" />
                     </Section>
-
-
 
                     {/* 5. Observações */}
                     <Section title="📝 Observações Adicionais" color="gray">
-                        <TextareaGroup label="Principais Cargas Movimentadas" placeholder="Descreva os principais tipos de carga..." />
-                        <TextareaGroup label="Projetos de Expansão" placeholder="Descreva projetos futuros..." />
-                        <TextareaGroup label="Observações Gerais" placeholder="Informações gerais relevantes" />
+                        <TextareaGroup label="Principais Cargas Movimentadas" name="mainCargoTypes" placeholder="Descreva os principais tipos de carga..." />
+                        <TextareaGroup label="Projetos de Expansão" name="expansionProjects" placeholder="Descreva projetos futuros..." />
+                        <TextareaGroup label="Observações Gerais" name="generalNotes" placeholder="Informações gerais relevantes" />
                     </Section>
 
                     <DialogFooter className="pt-4">
@@ -139,19 +150,23 @@ function Section({
 
 function InputGroup({
     label,
+    name,
     placeholder = "",
     type = "text",
     maxLength,
 }: {
     label: string;
+    name: string;
     placeholder?: string;
     type?: string;
     maxLength?: number;
 }) {
     return (
         <div>
-            <Label className="mb-2">{label}</Label>
+            <Label className="mb-2" htmlFor={name}>{label}</Label>
             <Input
+                id={name}
+                name={name}
                 className="bg-white mt-1"
                 placeholder={placeholder}
                 type={type}
@@ -163,37 +178,44 @@ function InputGroup({
 
 function SelectGroup({
     label,
+    name,
     options,
 }: {
     label: string;
+    name: string;
     options: string[];
 }) {
     return (
         <div>
-            <Label>{label}</Label>
-            <select className="bg-white border border-gray-300 rounded-md w-full px-3 py-2 mt-1">
+            <Label htmlFor={name}>{label}</Label>
+            <select
+                id={name}
+                name={name}
+                className="bg-white border border-gray-300 rounded-md w-full px-3 py-2 mt-1"
+            >
                 <option value="">Selecione...</option>
                 {options.map((opt) => (
-                    <option key={opt} value={opt.toLowerCase()}>
-                        {opt}
-                    </option>
+                    <option key={opt} value={opt.toLowerCase()}>{opt}</option>
                 ))}
             </select>
         </div>
     );
 }
-
 function TextareaGroup({
     label,
+    name,
     placeholder = "",
 }: {
     label: string;
+    name: string;
     placeholder?: string;
 }) {
     return (
         <div>
-            <Label>{label}</Label>
+            <Label htmlFor={name}>{label}</Label>
             <Textarea
+                id={name}
+                name={name}
                 className="bg-white mt-2"
                 placeholder={placeholder}
             />

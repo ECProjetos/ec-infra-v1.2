@@ -14,7 +14,7 @@ interface EquipCardProps {
 
 export function EquipCard({ data }: EquipCardProps) {
     return (
-        <Card className="transition-transform duration-300 ease-out hover:-translate-y-2 h-full overflow-y-auto">
+        <Card className="transition-transform duration-300 ease-out hover:-translate-y-2 h-full overflow-y-auto hover:shadow-xl">
             <CardHeader>
                 <h1 className="text-2xl font-semibold mb-4">Status dos Equipamentos</h1>
                 <ul className="space-y-2">
@@ -50,7 +50,7 @@ interface ShipsCardProps {
 
 export function ShipsCard({ data }: ShipsCardProps) {
     return (
-        <Card className="p-5 transition-transform duration-300 ease-out hover:-translate-y-2 h-full overflow-y-auto">
+        <Card className="p-5 transition-transform duration-300 ease-out hover:-translate-y-2 h-full overflow-y-auto hover:shadow-xl">
             <h2 className="text-lg font-semibold mb-1">Próximos Navios</h2>
             <ul className="space-y-4">
                 {data.map((ship, index) => (
@@ -84,7 +84,7 @@ interface AlertsCardProps {
 
 export function AlertsCard({ data }: AlertsCardProps) {
     return (
-        <div className="bg-white rounded-xl shadow-sm p-5 w-full h-full transition-transform duration-300 ease-out hover:-translate-y-2 h-full overflow-y-auto">
+        <div className="bg-white rounded-xl shadow-sm p-5 w-full h-full transition-transform duration-300 ease-out hover:-translate-y-2 h-full overflow-y-auto hover:shadow-xl">
             <h2 className="text-lg font-semibold mb-4 mx-3">Alertas</h2>
             <ul className="space-y-4">
                 {data.map((alert, index) => (

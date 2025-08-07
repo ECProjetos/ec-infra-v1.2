@@ -5,7 +5,8 @@ export const AtivoCreationSchema = z.object({
     uf: z.string(),
     city: z.string(),
     description: z.string(),
-    url: z.string()
+    url: z.string(),
+    user_id: z.string()
 })
 
 export type AtivoCreationType = z.infer<typeof AtivoCreationSchema>

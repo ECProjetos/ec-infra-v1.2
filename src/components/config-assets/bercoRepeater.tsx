@@ -6,7 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
-export function BercoRepeater() {
+interface BerthProps {
+    name: string
+}
+
+export function BercoRepeater({ name }: BerthProps) {
     const [descricaoGeral, setDescricaoGeral] = useState("");
     const [bercos, setBercos] = useState([
         { nome: "", comprimento: "", calado: "" },
@@ -34,6 +38,15 @@ export function BercoRepeater() {
 
     return (
         <div className="space-y-4">
+            <input
+                type="hidden"
+                name={name}
+                value={JSON.stringify({
+                    descricao: descricaoGeral,
+                    itens: bercos,
+                })}
+                readOnly
+            />
             <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-sm">Berços/Cais</h4>
                 <Button type="button" variant="default" onClick={handleAdd} className="bg-green-600 hover:bg-green-700 text-white">

@@ -22,7 +22,7 @@ interface MovChartProps {
 export function MovimentacaoChart({ data }: MovChartProps) {
   return (
     <>
-      <Card>
+      <Card className='transition-transform duration-300 ease-out hover:-translate-y-2 hover:shadow-xl'>
         <ResponsiveContainer width="100%" height={340} >
           <LineChart data={data} margin={{ top: 20, right: 40, left: 20, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />

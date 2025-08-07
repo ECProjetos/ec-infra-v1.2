@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function InfraestruturaRepeater() {
+interface InfraProps {
+    name: string
+}
+
+export function InfraestruturaRepeater({ name }: InfraProps) {
     const [infra, setInfra] = useState([
         { tipo: "", descricao: "", quantidade: "", capacidade: "", unidade: "" },
     ]);
@@ -31,7 +35,13 @@ export function InfraestruturaRepeater() {
     const unidades = ["m²", "m³", "toneladas", "litros"];
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-4">
+            <input
+                type="hidden"
+                name={name}
+                value={JSON.stringify(infra)}
+                readOnly
+            />
             <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-sm">Lista de Infraestrutura</h4>
                 <Button

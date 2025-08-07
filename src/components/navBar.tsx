@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnchor, faBell, faCalendarAlt, faClock } from "@fortawesome/free-solid-svg-icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import 'animate.css';
-import { CadastroTerminalPortuarioDialog } from "./new-asset/addAsset";
+import { CadastroTerminalPortuarioDialog } from "./config-assets/addAsset";
 
 export function AppNav() {
     return (

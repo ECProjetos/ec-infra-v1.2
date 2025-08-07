@@ -52,7 +52,7 @@ export function DonutChart({
     }
 
     return (
-        <div className="bg-white p-4 rounded-lg border shadow-sm transition-transform duration-300 ease-out hover:-translate-y-2">
+        <div className="bg-white p-4 rounded-lg border shadow-sm transition-transform duration-300 ease-out hover:-translate-y-2 hover:shadow-xl">
             {title && (
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
                     {title}

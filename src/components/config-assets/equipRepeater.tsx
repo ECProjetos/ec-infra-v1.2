@@ -13,7 +13,11 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 
-export function EquipamentoRepeater() {
+interface EquipProps {
+    name: string,
+}
+
+export function EquipamentoRepeater({ name }: EquipProps) {
     const [equipamentos, setEquipamentos] = useState([
         {
             tipo: "",
@@ -56,6 +60,13 @@ export function EquipamentoRepeater() {
 
     return (
         <div className="space-y-4">
+            <input
+                type="hidden"
+                name={name}
+                value={JSON.stringify(equipamentos)}
+                readOnly
+            />
+
             <div className="flex items-center justify-between">
                 <h4 className="font-semibold text-sm">Lista de Equipamentos</h4>
                 <Button

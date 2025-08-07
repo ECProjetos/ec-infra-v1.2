@@ -19,6 +19,7 @@ export function UploadKMLKMZ() {
             <Label className="font-medium">Arquivo KMZ/KML do Terminal</Label>
             <div className="flex items-center gap-4">
                 <Input
+                    name="kmlFileUrl"
                     type="file"
                     accept=".kmz,.kml"
                     onChange={handleFileChange}
@@ -26,7 +27,7 @@ export function UploadKMLKMZ() {
                 />
                 <span className="text-sm text-gray-700">{fileName}</span>
             </div>
-        
+
         </div>
     );
 }

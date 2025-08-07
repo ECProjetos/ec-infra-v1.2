@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { CreateAtivo } from "@/app/actions/ativos/ativo";
 import { toast } from 'sonner'
+import { getUserSession } from "@/app/(auth)/actions";
 
 const initialState = { success: false, error: null as string | null };
 
@@ -15,6 +16,16 @@ export default function CadastrarAtivoPage() {
         },
         initialState
     );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [userId, setUserId] = useState<any>();
+
+    useEffect(() => {
+        getUserSession().then(session => {
+            setUserId(session?.user?.id);
+        });
+    }, []);
+
+
     useEffect(() => {
         if (state.success) {
             toast.success("Ativo cadastrado com sucesso!");
@@ -26,6 +37,7 @@ export default function CadastrarAtivoPage() {
 
     return (
         <form className="max-h-[80vh]  p-10 space-y-6 bg-white rounded-xl " action={formAction}>
+            <input type="hidden" name="user_id" value={userId} />
             <div className="rounded-lg p-4 space-y-4 bg-gray-50 border-l-4 border-blue-600 space-y-3">
                 <h3 className="font-semibold text-lg">Informações Básicas</h3>
                 <div className="grid md:grid-cols-2 gap-4">

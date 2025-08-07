@@ -68,8 +68,7 @@ export async function Login(formData: FormData) {
     return { error: 'Falha ao fazer login. Verifique suas credenciais' };
   }
 
-  // Revalidate the dashboard page to update the user session
-  revalidatePath('/selecionar-ativo', 'layout');
+  revalidatePath('/selecionar-ativo');
   return { success: 'Login Realizado!' };
 }
 

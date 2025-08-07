@@ -5,19 +5,31 @@ import { useRouter } from "next/navigation";
 import { AtivoCreationType } from "@/app/types/ativos/ativos";
 import { AtivoCard } from "@/components/selecionar-ativo/ativoCard";
 import { getAtivos } from "@/app/actions/ativos/ativo";
+import { getUserSession } from "@/app/(auth)/actions";
 
 export default function SelecionarAtivo() {
     const [ativos, setAtivos] = useState<AtivoCreationType[]>([]);
     const router = useRouter();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [userId, setUserId] = useState<any>();
+    console.log(userId)
+    useEffect(() => {
+        getUserSession().then(session => {
+            setUserId(session?.user?.id);
+        });
+    }, []);
+
+
+
 
     useEffect(() => {
         async function fetchAtivos() {
-            const data = await getAtivos();
+            const data = await getAtivos({ user_id: userId });
             setAtivos(data as AtivoCreationType[]);
         }
 
         fetchAtivos();
-    }, []);
+    }, [userId]);
 
     function handleClick(ativoUrl: string) {
         localStorage.setItem('selectedAtivo', ativoUrl);

@@ -34,9 +34,11 @@ export async function CreateAtivo(formData: FormData): Promise<any> {
 
 
 
-export async function getAtivos() {
+export async function getAtivos({ user_id }: { user_id: string }) {
     const supabase = await createClient();
-    const { data, error } = await supabase.from("assets").select("*");
+    console.log(user_id)
+    const { data, error } = await supabase.from("assets").select("*").eq('user_id', user_id);
+    console.log(data)
 
     if (error) {
         console.error("Erro ao buscar ativos:", error.message);
