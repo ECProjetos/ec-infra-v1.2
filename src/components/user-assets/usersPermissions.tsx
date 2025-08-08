@@ -7,43 +7,16 @@ import {
     DialogClose,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { useActionState, useEffect } from "react";
-import { ConfigAtivo } from "@/app/actions/ativos/configAtivo";
-import { toast } from "sonner";
-import { useAtivoStore } from "@/stores/useAtivoStore";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { TabsContent } from "@radix-ui/react-tabs";
-import { GroupRepeater } from "./groupRepeater";
-
-const initialState = { success: false, error: null as string | null };
-
+import GroupRepeater from "./groupRepeater";
+import UserRepeater from "./usersRepeater";
 
 export function ConfigurarUsuarios() {
-    const [state, formAction] = useActionState(
-        async (prevState: { success: boolean; error: string | null }, formData: FormData) => {
-            return await ConfigAtivo(formData);
-        },
-        initialState
-    );
-    const asset = useAtivoStore()
-    const assetId = asset.ativo?.id;
-
-    useEffect(() => {
-        if (state.success) {
-            toast.success("Ativo configurado com sucesso!");
-        }
-        if (state.error) {
-            toast.error(`Erro ao configurar ativo: ${state.error}`);
-        }
-    }, [state]);
-
-
-
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -72,23 +45,21 @@ export function ConfigurarUsuarios() {
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value="group">
-                        <form className="space-y-8 p-4" action={formAction}>
-                            <input type="hidden" name="id" value={assetId ?? ""} />
-                            <GroupRepeater name="group" />
-                        </form>
-
+                        <GroupRepeater name="groups" />
+                        <DialogClose asChild className="mx-3">
+                            <Button variant="outline">Cancelar</Button>
+                        </DialogClose>
+                    </TabsContent>
+                    <TabsContent value="user">
+                        <div>
+                            <UserRepeater name="users" />
+                            <DialogClose asChild className="mx-3">
+                                <Button variant="outline">Cancelar</Button>
+                            </DialogClose>
+                        </div>
                     </TabsContent>
                 </Tabs>
 
-
-                <DialogFooter className="pt-4">
-                    <DialogClose asChild>
-                        <Button variant="outline">Cancelar</Button>
-                    </DialogClose>
-                    <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
-                        Salvar Configurações
-                    </Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog >
     );
