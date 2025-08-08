@@ -1,4 +1,4 @@
-// app/actions/permissoes/getUserPermissionsByAsset.ts
+// app/actions/permissoes/getUserPermissionByAsset.ts
 'use server';
 
 import { createClient } from "@/utils/supabase/server";
@@ -7,16 +7,16 @@ export async function getUserPermissionsByAsset(asset_id: string) {
     const supabase = await createClient();
 
     const { data, error } = await supabase
-        .from("user_permission_groups")
-        .select("user_id, group_id, permission_groups(group_id, nome)")
-        .eq("permission_groups.asset_id", asset_id);
+        .from("user_permission_groups_view")
+        .select("user_id, group_id")
+        .eq("asset_id", asset_id);
 
     if (error) {
-        console.error(error);
+        console.error("Erro ao buscar permissões:", error.message);
         return [];
     }
 
-    // Agrupar por grupo
+    // Agrupa por grupo_id
     const grouped: Record<string, { group_id: string; user_ids: string[] }> = {};
 
     for (const row of data) {

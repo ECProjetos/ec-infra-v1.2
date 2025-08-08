@@ -1,13 +1,15 @@
 'use client'
 
 import { useAtivoAtual } from "@/hooks/use-ativo";
+import { usePermissionStore } from "@/stores/usePermissionStore";
 
 export default function AtivoLayout({ children }: { children: React.ReactNode }) {
     useAtivoAtual();
+    usePermissionStore()
+    console.log(usePermissionStore())
 
     return (
         <div>
-            {/* Você pode acessar os dados do ativo em qualquer componente */}
             {children}
         </div>
     );

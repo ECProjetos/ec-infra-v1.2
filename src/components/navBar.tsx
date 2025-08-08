@@ -1,11 +1,11 @@
 'use client';
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAnchor, faBell, faCalendarAlt, faClock } from "@fortawesome/free-solid-svg-icons";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { faAnchor, faBell, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import 'animate.css';
 import { CadastroTerminalPortuarioDialog } from "./config-assets/addAsset";
 import { ConfigurarUsuarios } from "./user-assets/usersPermissions";
+import { logoutClient } from "@/app/(auth)/logoutClient";
 
 export function AppNav() {
     return (
@@ -26,16 +26,12 @@ export function AppNav() {
 
 
 
-            <div className="flex items-center gap-6 text-sm text-muted-foreground animate__animated animate__fadeInRight animate__delay-2s">
+            <div className="flex items-center gap-6 text-sm text-muted-foreground animate__animated animate__fadeInRight animate__delay-1s">
                 <div className="flex items-center gap-2">
                     <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-600" />
                     <span>
                         {new Date().toLocaleDateString('pt-BR')}
                     </span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faClock} className="text-rose-500" />
-                    <span>Última atualização: 14:30</span>
                 </div>
                 <FontAwesomeIcon icon={faBell} className="text-gray-400 w-5 h-5 cursor-pointer" />
 
@@ -43,9 +39,7 @@ export function AppNav() {
 
                 <ConfigurarUsuarios />
 
-                <Avatar>
-                    <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">AD</AvatarFallback>
-                </Avatar>
+                <p className="text-red-500 cursor-pointer" onClick={logoutClient}>Sair</p>
             </div>
         </nav >
     )
