@@ -64,9 +64,10 @@ const items: MenuItem[] = [
         perm: "sustentabilidade",
         subitems: [
             { title: "Dashboard", url: "/sustentabilidade/dashboard", perm: "sustentabilidade/dashboard" },
-            { title: "Criar Programas", url: "/sustentabilidade/programas", perm: "sustentabilidade/criar-programa" },
-            { title: "Gestão & Medições", url: "/sustentabilidade/gestao-medicoes", perm: "sustentabilidade/gestao-medicoes" },
-            { title: "IDA ANTAQ", url: "/sustentabilidade/ida-antaq", perm: "sustentabilidade/ida-antaq" },
+            { title: "Licensas Ambientais", url: "/sustentabilidade/licensas", perm: "sustentabilidade/licensas" },
+            { title: "Cadastro P&P", url: "/sustentabilidade/programas", perm: "sustentabilidade/criar-programa" },
+            { title: "PBA Do Porto", url: "/sustentabilidade/pba-do-porto", perm: "sustentabilidade/pba-do-porto" },
+            { title: "Geração de Relatórios", url: "/sustentabilidade/gerar-relatorios", perm: "sustentabilidade/gerar-relatorios" },
         ],
     },
     { title: "Gestão da Infraestrutura", url: "/infraestrutura", icon: Users, perm: "infraestrutura" },

@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EC Infra - Gestão Ambiental Portuária</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .status-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .status-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-right: 3px solid white;
+        }
+
+        .form-dynamic {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-2 rounded-lg">
+                        <i class="fas fa-ship text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">EC Infra</h1>
+                        <p class="text-sm opacity-90">Gestão Ambiental Portuária</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                        <i class="fas fa-user mr-2"></i>
+                        <span>Admin</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="gradient-bg text-white w-64 min-h-screen shadow-lg">
+            <nav class="p-6">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="sidebar-item active flex items-center space-x-3 p-3 rounded-lg"
+                            onclick="showSection('dashboard')">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg"
+                            onclick="showSection('pba')">
+                            <i class="fas fa-file-alt"></i>
+                            <span>PBA do Porto</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg"
+                            onclick="showSection('licencas')">
+                            <i class="fas fa-certificate"></i>
+                            <span>Licenças Ambientais</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg"
+                            onclick="showSection('cadastro')">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Cadastro P&P</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg"
+                            onclick="showSection('relatorios')">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Ambiental</h2>
+                    <p class="text-gray-600">Visão geral do status ambiental do terminal portuário</p>
+                </div>
+
+                <!-- Status Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Licenças Ativas</p>
+                                <p class="text-3xl font-bold text-green-600">12</p>
+                            </div>
+                            <div class="status-active p-3 rounded-full">
+                                <i class="fas fa-certificate text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center text-sm text-green-600">
+                                <i class="fas fa-arrow-up mr-1"></i>
+                                <span>2 renovadas este mês</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Planos Ativos</p>
+                                <p class="text-3xl font-bold text-blue-600">28</p>
+                            </div>
+                            <div class="bg-blue-500 p-3 rounded-full">
+                                <i class="fas fa-tasks text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center text-sm text-blue-600">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span>5 próximos do prazo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Programas</p>
+                                <p class="text-3xl font-bold text-purple-600">15</p>
+                            </div>
+                            <div class="bg-purple-500 p-3 rounded-full">
+                                <i class="fas fa-project-diagram text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center text-sm text-purple-600">
+                                <i class="fas fa-check mr-1"></i>
+                                <span>3 concluídos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">IDA ANTAQ</p>
+                                <p class="text-3xl font-bold text-orange-600">8.7</p>
+                            </div>
+                            <div class="status-warning p-3 rounded-full">
+                                <i class="fas fa-chart-line text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center text-sm text-orange-600">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                <span>Acima da média</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Recent Activities -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Status das Licenças</h3>
+                        <div class="relative h-64 flex items-center justify-center">
+                            <canvas id="licencasChart" class="max-w-full max-h-full"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Próximos Agendamentos</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                                <div class="bg-blue-500 p-2 rounded-full mr-4">
+                                    <i class="fas fa-calendar text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Monitoramento Qualidade da Água</p>
+                                    <p class="text-sm text-gray-600">15/12/2024 - 09:00</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                                <div class="bg-green-500 p-2 rounded-full mr-4">
+                                    <i class="fas fa-leaf text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Auditoria Ambiental</p>
+                                    <p class="text-sm text-gray-600">18/12/2024 - 14:00</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center p-3 bg-yellow-50 rounded-lg">
+                                <div class="bg-yellow-500 p-2 rounded-full mr-4">
+                                    <i class="fas fa-exclamation-triangle text-white"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Renovação Licença LO</p>
+                                    <p class="text-sm text-gray-600">22/12/2024 - Prazo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Conformidade por Mês</h3>
+                        <div class="relative h-64">
+                            <canvas id="conformidadeChart" class="max-w-full max-h-full"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Programas por Status</h3>
+                        <div class="relative h-64 flex items-center justify-center">
+                            <canvas id="programasChart" class="max-w-full max-h-full"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PBA Section -->
+            <div id="pba" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">PBA do Porto</h2>
+                    <p class="text-gray-600">Planos e Programas Ambientais</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Planos e Programas</h3>
+                            <div class="space-y-4">
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                                    onclick="showPlanDetails('agua')">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-800">Programa de Monitoramento da
+                                                Qualidade da Água</h4>
+                                            <p class="text-sm text-gray-600">Status: Ativo | Próxima coleta: 15/12/2024
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Em
+                                                dia</span>
+                                            <i class="fas fa-chevron-right text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                                    onclick="showPlanDetails('fauna')">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-800">Programa de Monitoramento da Fauna
+                                            </h4>
+                                            <p class="text-sm text-gray-600">Status: Ativo | Próximo censo: 20/12/2024
+                                            </p>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span
+                                                class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Atenção</span>
+                                            <i class="fas fa-chevron-right text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                                    onclick="showPlanDetails('residuos')">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-800">Plano de Gerenciamento de Resíduos
+                                            </h4>
+                                            <p class="text-sm text-gray-600">Status: Ativo | Última atualização:
+                                                10/12/2024</p>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span
+                                                class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Atualizado</span>
+                                            <i class="fas fa-chevron-right text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Resumo Executivo</h3>
+                            <div class="space-y-4">
+                                <div class="text-center">
+                                    <div class="relative inline-flex">
+                                        <svg class="progress-ring w-24 h-24">
+                                            <circle cx="48" cy="48" r="40" stroke="#e5e7eb" stroke-width="8"
+                                                fill="transparent"></circle>
+                                            <circle cx="48" cy="48" r="40" stroke="#10b981" stroke-width="8"
+                                                fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="62.8"
+                                                class="progress-ring-circle"></circle>
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <span class="text-2xl font-bold text-green-600">75%</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-2">Conformidade Geral</p>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span>Planos Ativos</span>
+                                        <span class="font-semibold">8</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span>Programas em Execução</span>
+                                        <span class="font-semibold">12</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span>Ações Pendentes</span>
+                                        <span class="font-semibold text-yellow-600">3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Licenças Section -->
+            <div id="licencas" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Gestão de Licenças Ambientais</h2>
+                    <p class="text-gray-600">Gestão completa e acompanhamento de conformidade</p>
+                </div>
+
+                <!-- License Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total de Licenças</p>
+                                <p class="text-3xl font-bold text-blue-600">8</p>
+                            </div>
+                            <div class="bg-blue-500 p-3 rounded-full">
+                                <i class="fas fa-certificate text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Em Conformidade</p>
+                                <p class="text-3xl font-bold text-green-600">6</p>
+                            </div>
+                            <div class="status-active p-3 rounded-full">
+                                <i class="fas fa-check-circle text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Atenção Requerida</p>
+                                <p class="text-3xl font-bold text-yellow-600">2</p>
+                            </div>
+                            <div class="status-warning p-3 rounded-full">
+                                <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Condicionantes</p>
+                                <p class="text-3xl font-bold text-purple-600">24</p>
+                            </div>
+                            <div class="bg-purple-500 p-3 rounded-full">
+                                <i class="fas fa-list-check text-white text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800">Licenças e Gestão de Conformidade</h3>
+                        <div class="flex space-x-3">
+                            <button
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                onclick="generateComplianceReport()">
+                                <i class="fas fa-file-pdf mr-2"></i>Relatório de Conformidade
+                            </button>
+                            <button
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Nova Licença
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Licença</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Validade</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Conformidade</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Condicionantes</th>
+                                    <th class="text-left py-3 px-4 font-semibold text-gray-700">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                                    onclick="showLicenseManagement('LO-001')">
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-semibold text-gray-800">Licença de Operação</p>
+                                            <p class="text-sm text-gray-600">LO-001/2023</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-medium">15/06/2025</p>
+                                            <p class="text-sm text-green-600">180 dias restantes</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium text-green-600">85%</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-1">
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">8
+                                                OK</span>
+                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">2
+                                                Pendentes</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-800" title="Gerenciar">
+                                                <i class="fas fa-cogs"></i>
+                                            </button>
+                                            <button class="text-green-600 hover:text-green-800" title="Relatório">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                            <button class="text-purple-600 hover:text-purple-800" title="Histórico">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                                    onclick="showLicenseManagement('LI-002')">
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-semibold text-gray-800">Licença de Instalação</p>
+                                            <p class="text-sm text-gray-600">LI-002/2024</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-medium text-red-600">22/12/2024</p>
+                                            <p class="text-sm text-red-600">10 dias restantes</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                                                <div class="bg-yellow-500 h-2 rounded-full" style="width: 60%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium text-yellow-600">60%</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-1">
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">3
+                                                OK</span>
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">2
+                                                Críticas</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-800" title="Gerenciar">
+                                                <i class="fas fa-cogs"></i>
+                                            </button>
+                                            <button class="text-green-600 hover:text-green-800" title="Relatório">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                            <button class="text-purple-600 hover:text-purple-800" title="Histórico">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                                    onclick="showLicenseManagement('LP-003')">
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-semibold text-gray-800">Licença Prévia</p>
+                                            <p class="text-sm text-gray-600">LP-003/2024</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-medium">30/08/2025</p>
+                                            <p class="text-sm text-green-600">250 dias restantes</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 95%"></div>
+                                            </div>
+                                            <span class="text-sm font-medium text-green-600">95%</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-1">
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">6
+                                                OK</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-2">
+                                            <button class="text-blue-600 hover:text-blue-800" title="Gerenciar">
+                                                <i class="fas fa-cogs"></i>
+                                            </button>
+                                            <button class="text-green-600 hover:text-green-800" title="Relatório">
+                                                <i class="fas fa-file-alt"></i>
+                                            </button>
+                                            <button class="text-purple-600 hover:text-purple-800" title="Histórico">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cadastro Section -->
+            <div id="cadastro" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Cadastro de Planos e Programas</h2>
+                    <p class="text-gray-600">Interface dinâmica e completa para criação de P&P</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Novo Plano/Programa</h3>
+
+                        <!-- Basic Information -->
+                        <div class="border-b border-gray-200 pb-6 mb-6">
+                            <h4 class="text-lg font-medium text-gray-800 mb-4">Informações Básicas</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                    <select
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        onchange="updateFormFields(this.value)">
+                                        <option value="">Selecione o tipo</option>
+                                        <option value="monitoramento">Programa de Monitoramento</option>
+                                        <option value="gerenciamento">Plano de Gerenciamento</option>
+                                        <option value="controle">Programa de Controle</option>
+                                        <option value="educacao">Programa de Educação Ambiental</option>
+                                        <option value="emergencia">Plano de Emergência</option>
+                                        <option value="recuperacao">Programa de Recuperação</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome</label>
+                                    <input type="text"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Nome do plano/programa">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Código</label>
+                                    <input type="text"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Ex: PMA-001">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Responsável
+                                        Técnico</label>
+                                    <input type="text"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="Nome do responsável">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Data de Início</label>
+                                    <input type="date"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Prazo de
+                                        Execução</label>
+                                    <input type="date"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Descrição/Objetivo</label>
+                                <textarea
+                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    rows="3" placeholder="Descreva os objetivos e escopo do plano/programa"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Form Fields -->
+                        <div id="dynamicForm" class="form-dynamic hidden">
+                            <!-- Dynamic form fields will be inserted here -->
+                        </div>
+
+                        <!-- Additional Sections -->
+                        <div id="additionalSections" class="space-y-6">
+                            <!-- Levantamentos de Campo -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-medium text-gray-800">Levantamentos de Campo</h4>
+                                    <button type="button"
+                                        class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"
+                                        onclick="addFieldSurvey()">
+                                        <i class="fas fa-plus mr-1"></i>Adicionar Levantamento
+                                    </button>
+                                </div>
+                                <div id="fieldSurveys" class="space-y-4">
+                                    <!-- Field surveys will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Medições e Indicadores -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-medium text-gray-800">Medições e Indicadores</h4>
+                                    <button type="button"
+                                        class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                        onclick="addMeasurement()">
+                                        <i class="fas fa-plus mr-1"></i>Adicionar Medição
+                                    </button>
+                                </div>
+                                <div id="measurements" class="space-y-4">
+                                    <!-- Measurements will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Periodicidade e Cronograma -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-medium text-gray-800">Periodicidade e Cronograma</h4>
+                                    <button type="button"
+                                        class="bg-purple-600 text-white px-3 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                                        onclick="addSchedule()">
+                                        <i class="fas fa-plus mr-1"></i>Adicionar Atividade
+                                    </button>
+                                </div>
+                                <div id="schedules" class="space-y-4">
+                                    <!-- Schedules will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Recursos e Equipe -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-medium text-gray-800">Recursos e Equipe</h4>
+                                    <button type="button"
+                                        class="bg-orange-600 text-white px-3 py-2 rounded-lg hover:bg-orange-700 transition-colors text-sm"
+                                        onclick="addResource()">
+                                        <i class="fas fa-plus mr-1"></i>Adicionar Recurso
+                                    </button>
+                                </div>
+                                <div id="resources" class="space-y-4">
+                                    <!-- Resources will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Documentos e Anexos -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-medium text-gray-800">Documentos e Anexos</h4>
+                                    <button type="button"
+                                        class="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                                        onclick="addDocument()">
+                                        <i class="fas fa-plus mr-1"></i>Adicionar Documento
+                                    </button>
+                                </div>
+                                <div id="documents" class="space-y-4">
+                                    <!-- Documents will be added here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+                        <div class="flex space-x-3">
+                            <button type="button"
+                                class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                                onclick="saveAsDraft()">
+                                <i class="fas fa-save mr-2"></i>Salvar Rascunho
+                            </button>
+                            <button type="button"
+                                class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors"
+                                onclick="previewPlan()">
+                                <i class="fas fa-eye mr-2"></i>Visualizar
+                            </button>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button
+                                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                                Cancelar
+                            </button>
+                            <button
+                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-check mr-2"></i>Finalizar e Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios Section -->
+            <div id="relatorios" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Geração de Relatórios</h2>
+                    <p class="text-gray-600">Configuração e geração automática de relatórios</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Configurar Relatório</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Relatório</label>
+                                <select
+                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option>Relatório de Conformidade</option>
+                                    <option>Relatório de Monitoramento</option>
+                                    <option>Relatório Executivo</option>
+                                    <option>Relatório de Licenças</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Período</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="date"
+                                        class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <input type="date"
+                                        class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Frequência</label>
+                                <select
+                                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option>Manual</option>
+                                    <option>Semanal</option>
+                                    <option>Mensal</option>
+                                    <option>Trimestral</option>
+                                    <option>Anual</option>
+                                </select>
+                            </div>
+                            <button
+                                class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>Gerar Relatório
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Relatórios Recentes</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium text-gray-800">Relatório de Conformidade - Nov/2024</p>
+                                    <p class="text-sm text-gray-600">Gerado em 01/12/2024</p>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium text-gray-800">Relatório de Monitoramento - Q3/2024</p>
+                                    <p class="text-sm text-gray-600">Gerado em 15/11/2024</p>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="font-medium text-gray-800">Relatório Executivo - Out/2024</p>
+                                    <p class="text-sm text-gray-600">Gerado em 05/11/2024</p>
+                                </div>
+                                <button class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Plan Details -->
+    <div id="planModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 id="modalTitle" class="text-2xl font-bold text-gray-800"></h3>
+                    <button onclick="closePlanModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="modalContent" class="p-6">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for License Management -->
+    <div id="licenseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 id="licenseModalTitle" class="text-2xl font-bold text-gray-800"></h3>
+                    <div class="flex items-center space-x-3">
+                        <button
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                            onclick="generateLicenseReport()">
+                            <i class="fas fa-file-pdf mr-2"></i>Relatório
+                        </button>
+                        <button onclick="closeLicenseModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="licenseModalContent" class="p-6">
+                <!-- License modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.sidebar-item').classList.add('active');
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            // Status das Licenças - Doughnut Chart
+            const ctx1 = document.getElementById('licencasChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Válidas', 'Próximas ao Vencimento', 'Vencidas'],
+                    datasets: [{
+                        data: [12, 3, 1],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Conformidade por Mês - Line Chart
+            const ctx2 = document.getElementById('conformidadeChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                    datasets: [{
+                        label: 'Conformidade (%)',
+                        data: [78, 82, 85, 88, 85, 90, 87, 89, 92, 88, 85, 87],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 70,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                callback: function (value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Programas por Status - Bar Chart
+            const ctx3 = document.getElementById('programasChart').getContext('2d');
+            new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: ['Ativos', 'Em Andamento', 'Concluídos', 'Pendentes'],
+                    datasets: [{
+                        data: [15, 8, 12, 3],
+                        backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'],
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Dynamic Form Generation
+        function updateFormFields(type) {
+            const dynamicForm = document.getElementById('dynamicForm');
+
+            if (!type) {
+                dynamicForm.classList.add('hidden');
+                return;
+            }
+
+            dynamicForm.classList.remove('hidden');
+
+            let formHTML = '';
+
+            switch (type) {
+                case 'monitoramento':
+                    formHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Parâmetros a Monitorar</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Ex: pH, Oxigênio Dissolvido, Turbidez"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Periodicidade</label>
+                                <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option>Diária</option>
+                                    <option>Semanal</option>
+                                    <option>Mensal</option>
+                                    <option>Trimestral</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pontos de Coleta</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Número de pontos">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Método de Análise</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ex: APHA, ABNT">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'gerenciamento':
+                    formHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Resíduo/Recurso</label>
+                                <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option>Resíduos Sólidos</option>
+                                    <option>Efluentes Líquidos</option>
+                                    <option>Recursos Hídricos</option>
+                                    <option>Energia</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Responsável Técnico</label>
+                                <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nome do responsável">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Metas de Redução (%)</label>
+                                <input type="number" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ex: 20">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Prazo de Implementação</label>
+                                <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    `;
+                    break;
+                default:
+                    formHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Descreva o programa"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Objetivos</label>
+                                <textarea class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Objetivos do programa"></textarea>
+                            </div>
+                        </div>
+                    `;
+            }
+
+            dynamicForm.innerHTML = formHTML;
+        }
+
+        // Plan Details Modal
+        function showPlanDetails(planId) {
+            const modal = document.getElementById('planModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            const planData = {
+                agua: {
+                    title: 'Programa de Monitoramento da Qualidade da Água',
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-3">Informações Gerais</h4>
+                                <div class="space-y-2">
+                                    <p><strong>Status:</strong> <span class="text-green-600">Ativo</span></p>
+                                    <p><strong>Início:</strong> 01/01/2024</p>
+                                    <p><strong>Próxima Coleta:</strong> 15/12/2024</p>
+                                    <p><strong>Responsável:</strong> Dr. João Silva</p>
+                                </div>
+                                
+                                <h4 class="text-lg font-semibold text-gray-800 mb-3 mt-6">Parâmetros Monitorados</h4>
+                                <ul class="space-y-1 text-sm">
+                                    <li>• pH</li>
+                                    <li>• Oxigênio Dissolvido</li>
+                                    <li>• Turbidez</li>
+                                    <li>• Coliformes Totais</li>
+                                    <li>• DBO</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800 mb-3">Últimos Resultados</h4>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <canvas id="waterQualityChart" width="400" height="200"></canvas>
+                                </div>
+                                
+                                <h4 class="text-lg font-semibold text-gray-800 mb-3 mt-6">Ações Programadas</h4>
+                                <div class="space-y-2">
+                                    <div class="flex items-center p-2 bg-blue-50 rounded">
+                                        <i class="fas fa-calendar text-blue-500 mr-2"></i>
+                                        <span class="text-sm">Coleta Ponto A1 - 15/12/2024</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-blue-50 rounded">
+                                        <i class="fas fa-calendar text-blue-500 mr-2"></i>
+                                        <span class="text-sm">Análise Laboratorial - 16/12/2024</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+
+            modalTitle.textContent = planData[planId].title;
+            modalContent.innerHTML = planData[planId].content;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePlanModal() {
+            const modal = document.getElementById('planModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // License Management Modal
+        function showLicenseManagement(licenseId) {
+            const modal = document.getElementById('licenseModal');
+            const modalTitle = document.getElementById('licenseModalTitle');
+            const modalContent = document.getElementById('licenseModalContent');
+
+            const licenseData = {
+                'LO-001': {
+                    title: 'Gestão da Licença de Operação - LO-001/2023',
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- License Info -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Informações da Licença</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <p><strong>Número:</strong> LO-001/2023</p>
+                                        <p><strong>Órgão:</strong> IBAMA</p>
+                                        <p><strong>Emissão:</strong> 15/06/2023</p>
+                                        <p><strong>Validade:</strong> 15/06/2025</p>
+                                        <p><strong>Status:</strong> <span class="text-green-600 font-medium">Válida</span></p>
+                                        <p><strong>Dias Restantes:</strong> <span class="text-green-600 font-medium">180</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-blue-50 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Conformidade Geral</h4>
+                                    <div class="text-center">
+                                        <div class="relative inline-flex">
+                                            <svg class="progress-ring w-20 h-20">
+                                                <circle cx="40" cy="40" r="32" stroke="#e5e7eb" stroke-width="6" fill="transparent"></circle>
+                                                <circle cx="40" cy="40" r="32" stroke="#10b981" stroke-width="6" fill="transparent" 
+                                                        stroke-dasharray="201" stroke-dashoffset="30" class="progress-ring-circle"></circle>
+                                            </svg>
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <span class="text-xl font-bold text-green-600">85%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Condicionantes -->
+                            <div class="lg:col-span-2">
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4">Condicionantes e Atendimento</h4>
+                                <div class="space-y-4">
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h5 class="font-medium text-gray-800">2.1 - Programa de Monitoramento da Qualidade da Água</h5>
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Conforme</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-3">Implementar programa de monitoramento trimestral da qualidade da água</p>
+                                        <div class="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p><strong>Última Execução:</strong> 15/11/2024</p>
+                                                <p><strong>Próxima:</strong> 15/02/2025</p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Responsável:</strong> Dr. João Silva</p>
+                                                <p><strong>Status:</strong> <span class="text-green-600">Em dia</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 flex space-x-2">
+                                            <button class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">Ver Detalhes</button>
+                                            <button class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">Relatório</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h5 class="font-medium text-gray-800">2.2 - Plano de Gerenciamento de Resíduos Sólidos</h5>
+                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Pendente</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-3">Atualizar e implementar PGRS conforme NBR 10004</p>
+                                        <div class="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p><strong>Prazo:</strong> 30/12/2024</p>
+                                                <p><strong>Dias Restantes:</strong> <span class="text-red-600">18</span></p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Responsável:</strong> Eng. Maria Santos</p>
+                                                <p><strong>Status:</strong> <span class="text-yellow-600">Em andamento</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 flex space-x-2">
+                                            <button class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">Ver Detalhes</button>
+                                            <button class="bg-yellow-600 text-white px-3 py-1 rounded text-xs hover:bg-yellow-700">Acompanhar</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h5 class="font-medium text-gray-800">2.3 - Programa de Educação Ambiental</h5>
+                                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Conforme</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-3">Desenvolver ações de educação ambiental para funcionários e comunidade</p>
+                                        <div class="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p><strong>Última Ação:</strong> 05/12/2024</p>
+                                                <p><strong>Próxima:</strong> 15/01/2025</p>
+                                            </div>
+                                            <div>
+                                                <p><strong>Responsável:</strong> Ana Costa</p>
+                                                <p><strong>Status:</strong> <span class="text-green-600">Ativo</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 flex space-x-2">
+                                            <button class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">Ver Detalhes</button>
+                                            <button class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">Relatório</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Histórico de Atendimento</h4>
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <div class="space-y-3">
+                                            <div class="flex items-center text-sm">
+                                                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                                <span class="text-gray-600">15/11/2024 - Relatório de monitoramento da água enviado</span>
+                                            </div>
+                                            <div class="flex items-center text-sm">
+                                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                                                <span class="text-gray-600">05/12/2024 - Ação de educação ambiental realizada</span>
+                                            </div>
+                                            <div class="flex items-center text-sm">
+                                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                                                <span class="text-gray-600">10/12/2024 - PGRS em fase de atualização</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                'LI-002': {
+                    title: 'Gestão da Licença de Instalação - LI-002/2024',
+                    content: `
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-1">
+                                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Informações da Licença</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <p><strong>Número:</strong> LI-002/2024</p>
+                                        <p><strong>Órgão:</strong> IBAMA</p>
+                                        <p><strong>Emissão:</strong> 22/06/2024</p>
+                                        <p><strong>Validade:</strong> 22/12/2024</p>
+                                        <p><strong>Status:</strong> <span class="text-red-600 font-medium">Próximo ao Vencimento</span></p>
+                                        <p><strong>Dias Restantes:</strong> <span class="text-red-600 font-medium">10</span></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-yellow-50 rounded-lg p-4">
+                                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Conformidade Geral</h4>
+                                    <div class="text-center">
+                                        <div class="relative inline-flex">
+                                            <svg class="progress-ring w-20 h-20">
+                                                <circle cx="40" cy="40" r="32" stroke="#e5e7eb" stroke-width="6" fill="transparent"></circle>
+                                                <circle cx="40" cy="40" r="32" stroke="#f59e0b" stroke-width="6" fill="transparent" 
+                                                        stroke-dasharray="201" stroke-dashoffset="80" class="progress-ring-circle"></circle>
+                                            </svg>
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <span class="text-xl font-bold text-yellow-600">60%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="lg:col-span-2">
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                        <span class="text-red-800 font-medium">Atenção: Licença vence em 10 dias - Renovação urgente necessária</span>
+                                    </div>
+                                </div>
+                                
+                                <h4 class="text-lg font-semibold text-gray-800 mb-4">Condicionantes Críticas</h4>
+                                <div class="space-y-4">
+                                    <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h5 class="font-medium text-gray-800">3.1 - Estudo de Impacto de Ruído</h5>
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Crítico</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-3">Apresentar estudo de impacto sonoro das operações portuárias</p>
+                                        <div class="text-sm">
+                                            <p><strong>Prazo:</strong> <span class="text-red-600">20/12/2024</span></p>
+                                            <p><strong>Status:</strong> <span class="text-red-600">Pendente - 8 dias restantes</span></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h5 class="font-medium text-gray-800">3.2 - Plano de Emergência Atualizado</h5>
+                                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Crítico</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mb-3">Atualizar plano de emergência incluindo novos cenários</p>
+                                        <div class="text-sm">
+                                            <p><strong>Prazo:</strong> <span class="text-red-600">22/12/2024</span></p>
+                                            <p><strong>Status:</strong> <span class="text-red-600">Em elaboração - 10 dias restantes</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+
+            modalTitle.textContent = licenseData[licenseId].title;
+            modalContent.innerHTML = licenseData[licenseId].content;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLicenseModal() {
+            const modal = document.getElementById('licenseModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function generateLicenseReport() {
+            alert('Gerando relatório de conformidade da licença...');
+        }
+
+        function generateComplianceReport() {
+            alert('Gerando relatório geral de conformidade das licenças...');
+        }
+
+        function showLicenseDetails(licenseId) {
+            showLicenseManagement(licenseId);
+        }
+
+        // Dynamic form functions for cadastro
+        function addFieldSurvey() {
+            const container = document.getElementById('fieldSurveys');
+            const surveyId = Date.now();
+            const surveyHTML = `
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50" id="survey-${surveyId}">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-medium text-gray-800">Levantamento de Campo</h5>
+                        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeElement('survey-${surveyId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Levantamento</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Fauna</option>
+                                <option>Flora</option>
+                                <option>Qualidade da Água</option>
+                                <option>Sedimentos</option>
+                                <option>Ruído</option>
+                                <option>Ar</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Metodologia</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ex: Transecto linear">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Frequência</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Mensal</option>
+                                <option>Bimestral</option>
+                                <option>Trimestral</option>
+                                <option>Semestral</option>
+                                <option>Anual</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Pontos de Amostragem</label>
+                            <input type="number" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Número de pontos">
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', surveyHTML);
+        }
+
+        function addMeasurement() {
+            const container = document.getElementById('measurements');
+            const measurementId = Date.now();
+            const measurementHTML = `
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50" id="measurement-${measurementId}">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-medium text-gray-800">Medição/Indicador</h5>
+                        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeElement('measurement-${measurementId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Parâmetro</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ex: pH, DBO, Ruído">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ex: mg/L, dB(A)">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Limite/Meta</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Valor limite">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Método de Análise</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ex: APHA 4500-H+">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Equipamento</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Equipamento utilizado">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Frequência</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Diária</option>
+                                <option>Semanal</option>
+                                <option>Mensal</option>
+                                <option>Trimestral</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', measurementHTML);
+        }
+
+        function addSchedule() {
+            const container = document.getElementById('schedules');
+            const scheduleId = Date.now();
+            const scheduleHTML = `
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50" id="schedule-${scheduleId}">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-medium text-gray-800">Atividade Programada</h5>
+                        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeElement('schedule-${scheduleId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Atividade</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Nome da atividade">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Periodicidade</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Única</option>
+                                <option>Diária</option>
+                                <option>Semanal</option>
+                                <option>Mensal</option>
+                                <option>Trimestral</option>
+                                <option>Semestral</option>
+                                <option>Anual</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                            <input type="date" class="w-full p-2 border border-gray-300 rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Duração (dias)</label>
+                            <input type="number" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Duração">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                        <textarea class="w-full p-2 border border-gray-300 rounded text-sm" rows="2" placeholder="Descreva a atividade"></textarea>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', scheduleHTML);
+        }
+
+        function addResource() {
+            const container = document.getElementById('resources');
+            const resourceId = Date.now();
+            const resourceHTML = `
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50" id="resource-${resourceId}">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-medium text-gray-800">Recurso</h5>
+                        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeElement('resource-${resourceId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Pessoal</option>
+                                <option>Equipamento</option>
+                                <option>Material</option>
+                                <option>Serviço</option>
+                                <option>Veículo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Descrição do recurso">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                            <input type="number" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Qtd">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Responsável</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Nome do responsável">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Custo Estimado</label>
+                            <input type="number" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="R$ 0,00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Disponibilidade</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Disponível</option>
+                                <option>A contratar</option>
+                                <option>Em aquisição</option>
+                                <option>Indisponível</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', resourceHTML);
+        }
+
+        function addDocument() {
+            const container = document.getElementById('documents');
+            const documentId = Date.now();
+            const documentHTML = `
+                <div class="border border-gray-300 rounded-lg p-4 bg-gray-50" id="document-${documentId}">
+                    <div class="flex items-center justify-between mb-3">
+                        <h5 class="font-medium text-gray-800">Documento</h5>
+                        <button type="button" class="text-red-600 hover:text-red-800" onclick="removeElement('document-${documentId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                            <select class="w-full p-2 border border-gray-300 rounded text-sm">
+                                <option>Procedimento Operacional</option>
+                                <option>Manual Técnico</option>
+                                <option>Formulário</option>
+                                <option>Planilha de Controle</option>
+                                <option>Relatório Modelo</option>
+                                <option>Legislação</option>
+                                <option>Norma Técnica</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Documento</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Nome do documento">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Versão</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ex: v1.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Responsável</label>
+                            <input type="text" class="w-full p-2 border border-gray-300 rounded text-sm" placeholder="Responsável pela elaboração">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                        <textarea class="w-full p-2 border border-gray-300 rounded text-sm" rows="2" placeholder="Descrição do documento"></textarea>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', documentHTML);
+        }
+
+        function removeElement(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.remove();
+            }
+        }
+
+        function saveAsDraft() {
+            alert('Plano/Programa salvo como rascunho!');
+        }
+
+        function previewPlan() {
+            alert('Abrindo visualização do plano/programa...');
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function () {
+            initCharts();
+        });
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'96bf2b7f8036ca96',t:'MTc1NDY1Nzc0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

@@ -8,11 +8,10 @@ import {
     YAxis,
     Tooltip,
     CartesianGrid,
-    Area,
 } from 'recharts'
 
 interface ChartPoint {
-    quarter: string
+    mes: string
     value: number
 }
 
@@ -27,7 +26,6 @@ export function LineAreaChart({
     data,
     title = '',
     color = '#10b981', // Tailwind green-500
-    areaColor = 'rgba(16, 185, 129, 0.1)', // green-500 opacity-10
 }: LineAreaChartProps) {
     return (
         <div className="bg-white p-4 rounded-lg border shadow-sm">
@@ -41,19 +39,14 @@ export function LineAreaChart({
                 <ResponsiveContainer>
                     <LineChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="quarter" />
+                        <XAxis dataKey="mes" />
                         <YAxis domain={[7, 10]} />
                         <Tooltip
                             contentStyle={{ fontSize: '0.875rem' }}
-                            formatter={(value: number) => value.toFixed(2)}
+                            formatter={(value: number) => value.toFixed(2) + '%'}
                             labelStyle={{ fontWeight: 'bold' }}
                         />
-                        <Area
-                            type="monotone"
-                            dataKey="value"
-                            stroke="none"
-                            fill={areaColor}
-                        />
+
                         <Line
                             type="monotone"
                             dataKey="value"

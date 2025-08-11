@@ -83,7 +83,7 @@ export default function FinanceiroPage() {
             <div className="font-bold">
                 <FinancialCard data={financialData} />
             </div>
-            <div className="font-bold flex ga">
+            <div className="font-bold flex ga space-x-4">
                 <div className="w-1/2">
                     <DonutChart
                         title="Composição de Custos"

@@ -1,8 +1,9 @@
 import {
-    Leaf,
     Share2,
     ListTodo,
     AlertTriangle,
+    Star,
+    LineChartIcon
 } from "lucide-react"
 import { TopCards } from "@/components/sustentabilidade/dashboard/topCards"
 import { DonutChart } from "@/components/charts/donutChart"
@@ -11,9 +12,9 @@ import { AlertItem } from "@/components/sustentabilidade/dashboard/alerts"
 
 
 const mockProgramStatus = [
-    { name: "Conformes", value: 24 },
-    { name: "Atenção", value: 2 },
-    { name: "Críticos", value: 1 },
+    { name: "Válidas", value: 24 },
+    { name: "Próximas ao vencimento", value: 2 },
+    { name: "Vencidas", value: 1 },
 ]
 
 const mockAlerts = [
@@ -34,13 +35,18 @@ const mockAlerts = [
 ]
 
 const idaAntaqData = [
-    { quarter: "Q1 2023", value: 8.1 },
-    { quarter: "Q2 2023", value: 8.3 },
-    { quarter: "Q3 2023", value: 8.0 },
-    { quarter: "Q4 2023", value: 8.4 },
-    { quarter: "Q1 2024", value: 8.5 },
-    { quarter: "Q2 2024", value: 8.7 },
-    { quarter: "Q3 2024", value: 8.8 },
+    { mes: "Janeiro", value: 75 },
+    { mes: "Fevereiro", value: 80 },
+    { mes: "Março", value: 78 },
+    { mes: "Abril", value: 82 },
+    { mes: "Maio", value: 85 },
+    { mes: "Junho", value: 88 },
+    { mes: "Julho", value: 90 },
+    { mes: "Agosto", value: 87 },
+    { mes: "Setembro", value: 89 },
+    { mes: "Outubro", value: 92 },
+    { mes: "Novembro", value: 91 },
+    { mes: "Dezembro", value: 93 },
 ];
 
 export default function DashboardPage() {
@@ -48,10 +54,10 @@ export default function DashboardPage() {
         <div className="px-15 py-10 space-y-10">
             <div className="flex gap-4">
                 <TopCards
-                    title="IDA ANTAQ"
-                    value="8.62"
-                    subtitle="↑ +0.15 vs anterior"
-                    icon={<Leaf className="text-green-600" />}
+                    title="Licenças Ativas"
+                    value="12"
+                    subtitle="↑ 2 renovadas este mês"
+                    icon={<Star className="text-green-600" />}
                     borderColor="border-green-500"
                     iconBgColor="bg-green-100"
                     textColor="text-green-700"
@@ -81,21 +87,21 @@ export default function DashboardPage() {
                 />
 
                 <TopCards
-                    title="Alertas Críticos"
-                    value="2"
-                    subtitle="🔔 Ação imediata"
-                    icon={<AlertTriangle className="text-red-600" />}
-                    borderColor="border-red-500"
-                    iconBgColor="bg-red-100"
-                    textColor="text-red-700"
-                    subtitleColor="text-red-500"
+                    title="IDA ANTAQ"
+                    value="8.7"
+                    subtitle=" Acima da média"
+                    icon={<LineChartIcon className="text-orange-600" />}
+                    borderColor="border-orange-500"
+                    iconBgColor="bg-orange-100"
+                    textColor="text-orange-700"
+                    subtitleColor="text-orange-500"
                 />
             </div>
             <div className="gap-4 flex">
                 <div className="w-1/2">
                     <LineAreaChart
                         data={idaAntaqData}
-                        title="Evolução do IDA ANTAQ"
+                        title="Conformidade por Mês"
                         color="#10b981"       // green-500
                         areaColor="rgba(16, 185, 129, 0.1)"
                     />
@@ -103,7 +109,7 @@ export default function DashboardPage() {
                 <div className="w-1/2">
                     <DonutChart
                         data={mockProgramStatus}
-                        title="Status dos Programas"
+                        title="Status das Licenças"
                         unit=""
                         colors={["#10b981", "#f59e0b", "#ef4444"]} // verde, laranja, vermelho
                         showTotal={false}

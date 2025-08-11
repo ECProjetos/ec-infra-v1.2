@@ -24,11 +24,11 @@ const permissoes = [
     { label: "Inteligência de Mercado", value: "mercado" },
     { label: "Gestão Estratégica", value: "estrategica" },
     { label: "Gestão de Infraestrutura", value: "infraestrutura" },
-    { label: "Sustentabilidade", value: "sustentabilidade" },
     { label: "Dashboard de Sustentabilidade", value: "sustentabilidade/dashboard" },
-    { label: "Criar programa de Sustentabilidade", value: "sustentabilidade/criar-programa" },
-    { label: "Gestão de medições de Sustentabilidade", value: "sustentabilidade/gestao-medicoes" },
-    { label: "IDA ANTAQ de Sustentabilidade", value: "sustentabilidade/ida-antaq" },
+    { label: "PBA do porto", value: "sustentabilidade/pba-do-porto" },
+    { label: "Licensas Ambientais", value: "sustentabilidade/licensas" },
+    { label: "Cadastro P&P", value: "sustentabilidade/criar-programa" },
+    { label: "Geração de relatórios", value: "sustentabilidade/gerar-relatorios" },
 ];
 
 const initialState = { success: false, error: "" };

@@ -29,7 +29,7 @@ export function TopCards({
                 borderColor
             )}
         >
-            <div>
+            <div className="space-y-3">
                 <p className="text-sm text-gray-600">{title.toUpperCase()}</p>
                 <h2 className={cn("text-2xl font-bold", textColor)}>{value}</h2>
                 {subtitle && <p className={cn("text-sm", subtitleColor)}>{subtitle}</p>}

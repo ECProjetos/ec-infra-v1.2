@@ -4,8 +4,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnchor, faBell, faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 import 'animate.css';
 import { CadastroTerminalPortuarioDialog } from "./config-assets/addAsset";
-import { ConfigurarUsuarios } from "./user-assets/usersPermissions";
+import { ConfigurarUsuarios } from "./config-users/usersPermissions";
 import { logoutClient } from "@/app/(auth)/logoutClient";
+import { ConfigurarLaboratorios } from "./config-lab/labConfig";
 
 export function AppNav() {
     return (
@@ -38,6 +39,8 @@ export function AppNav() {
                 <CadastroTerminalPortuarioDialog />
 
                 <ConfigurarUsuarios />
+
+                <ConfigurarLaboratorios />
 
                 <p className="text-red-500 cursor-pointer" onClick={logoutClient}>Sair</p>
             </div>
