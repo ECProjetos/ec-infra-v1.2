@@ -1,12 +1,11 @@
 'use client'
 
 import { useAtivoAtual } from "@/hooks/use-ativo";
-import { usePermissionStore } from "@/stores/usePermissionStore";
+import { useUserPermissions } from "@/hooks/use-permissions";
 
 export default function AtivoLayout({ children }: { children: React.ReactNode }) {
     useAtivoAtual();
-    usePermissionStore()
-    console.log(usePermissionStore())
+    useUserPermissions()
 
     return (
         <div>
