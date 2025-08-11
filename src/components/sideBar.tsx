@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAtivoAtual } from "@/hooks/use-ativo";
 import { useAtivoStore } from "@/stores/useAtivoStore";
 
@@ -26,57 +27,103 @@ import {
     Users,
     ChevronDown,
 } from "lucide-react";
+import { useUserPermissions } from "@/hooks/use-permissions";
+import { usePermissionStore } from "@/stores/usePermissionStore";
 
-const items = [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Operações", url: "/operacoes", icon: Briefcase },
-    { title: "Financeiro", url: "/financeiro", icon: LineChart },
-    { title: "Gestão Estratégica", url: "/estrategica", icon: Puzzle },
-    { title: "Inteligência de Mercado", url: "/mercado", icon: Globe2 },
+type Subitem = {
+    title: string;
+    url: string;
+    perm: string; // deve casar com "value" vindo em permissoes
+};
+
+type MenuItem =
+    | {
+        title: string;
+        url: string;
+        icon: any;
+        perm: string; // deve casar com "value" vindo em permissoes
+        subitems?: never;
+    }
+    | {
+        title: string;
+        icon: any;
+        perm: string; // perm do grupo pai
+        subitems: Subitem[];
+        url?: never;
+    };
+
+const items: MenuItem[] = [
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, perm: "dashboard" },
+    { title: "Operações", url: "/operacoes", icon: Briefcase, perm: "operacoes" },
+    { title: "Financeiro", url: "/financeiro", icon: LineChart, perm: "financeiro" },
+    { title: "Gestão Estratégica", url: "/estrategica", icon: Puzzle, perm: "estrategica" },
+    { title: "Inteligência de Mercado", url: "/mercado", icon: Globe2, perm: "mercado" },
     {
         title: "Sustentabilidade",
         icon: Leaf,
+        perm: "sustentabilidade",
         subitems: [
-            { title: "Dashboard", url: "/sustentabilidade/dashboard" },
-            { title: "Criar Programas", url: "/sustentabilidade/programas" },
-            { title: "Gestão & Medições", url: "/sustentabilidade/gestao-medicoes" },
-            { title: "IDA ANTAQ", url: "/sustentabilidade/ida-antaq" },
+            { title: "Dashboard", url: "/sustentabilidade/dashboard", perm: "sustentabilidade/dashboard" },
+            { title: "Criar Programas", url: "/sustentabilidade/programas", perm: "sustentabilidade/criar-programa" },
+            { title: "Gestão & Medições", url: "/sustentabilidade/gestao-medicoes", perm: "sustentabilidade/gestao-medicoes" },
+            { title: "IDA ANTAQ", url: "/sustentabilidade/ida-antaq", perm: "sustentabilidade/ida-antaq" },
         ],
     },
-    { title: "Gestão da Infraestrutura", url: "/infraestrutura", icon: Users },
+    { title: "Gestão da Infraestrutura", url: "/infraestrutura", icon: Users, perm: "infraestrutura" },
 ];
 
 export function AppSidebar() {
     const pathname = usePathname();
     const [openItems, setOpenItems] = useState<string[]>([]);
     const ativo = useAtivoStore((state) => state.ativo);
+    const permissions = usePermissionStore().permissions as string[]; // ex.: ["dashboard", "sustentabilidade", "sustentabilidade/dashboard", ...]
+    const userPerms = useMemo(() => new Set(permissions ?? []), [permissions]);
 
-    useAtivoAtual(); // carrega e salva o ativo atual na store
+    useAtivoAtual();
+    useUserPermissions();
 
-    // Define ativoPrefix only if ativo exists
     const ativoPrefix = ativo ? `/${ativo.url}` : "";
 
+    /** Filtra menu e submenus conforme permissões */
+    const filteredItems = useMemo<MenuItem[]>(() => {
+        return items
+            .map((item) => {
+                // item simples: precisa da perm do próprio item
+                if ("url" in item) {
+                    if (!userPerms.has(item.perm)) return null;
+                    return item;
+                }
+
+                // grupo: precisa da perm do grupo E pelo menos um subitem permitido
+                if (!userPerms.has(item.perm)) return null;
+
+                const allowedSubs = item.subitems.filter((s) => userPerms.has(s.perm));
+                if (allowedSubs.length === 0) return null;
+
+                return { ...item, subitems: allowedSubs };
+            })
+            .filter(Boolean) as MenuItem[];
+    }, [userPerms]);
+
+    // Abre automaticamente o grupo do subitem ativo
     useEffect(() => {
         if (!ativo) return;
-        const current = items.find((item) =>
-            item.subitems?.some((sub) =>
-                pathname.startsWith(ativoPrefix + sub.url)
-            )
+        const current = filteredItems.find(
+            (item) =>
+                "subitems" in item &&
+                item.subitems?.some((sub) => pathname.startsWith(ativoPrefix + sub.url))
         );
 
         if (current && !openItems.includes(current.title)) {
             setOpenItems((prev) => [...prev, current.title]);
         }
-    }, [ativo, ativoPrefix, openItems, pathname]);
+    }, [ativo, ativoPrefix, pathname, filteredItems, openItems]);
 
-    // Enquanto não tem ativo, pode mostrar loading ou nada
     if (!ativo) return null;
 
     const toggleItem = (title: string) => {
         setOpenItems((prev) =>
-            prev.includes(title)
-                ? prev.filter((item) => item !== title)
-                : [...prev, title]
+            prev.includes(title) ? prev.filter((i) => i !== title) : [...prev, title]
         );
     };
 
@@ -86,16 +133,16 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => {
-                                const isOpen = openItems.includes(item.title);
+                            {filteredItems.map((item) => {
                                 const isActive =
-                                    (item.url && pathname === ativoPrefix + item.url) ||
-                                    item.subitems?.some((sub) =>
-                                        pathname.startsWith(ativoPrefix + sub.url)
-                                    );
+                                    ("url" in item && pathname === ativoPrefix + item.url) ||
+                                    ("subitems" in item &&
+                                        item.subitems?.some((sub) =>
+                                            pathname.startsWith(ativoPrefix + sub.url)
+                                        ));
 
-                                // Submenu
-                                if (item.subitems) {
+                                if ("subitems" in item) {
+                                    const isOpen = openItems.includes(item.title);
                                     return (
                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton
@@ -117,10 +164,9 @@ export function AppSidebar() {
 
                                             {isOpen && (
                                                 <div className="pl-6 mt-2 space-y-1">
-                                                    {item.subitems.map((subitem) => {
+                                                    {item.subitems?.map((subitem) => {
                                                         const isSubitemActive =
                                                             pathname === ativoPrefix + subitem.url;
-
                                                         return (
                                                             <Link
                                                                 key={subitem.title}
@@ -139,9 +185,6 @@ export function AppSidebar() {
                                         </SidebarMenuItem>
                                     );
                                 }
-
-                                // Menu simples
-                                if (!item.url) return null;
 
                                 return (
                                     <SidebarMenuItem key={item.title}>
