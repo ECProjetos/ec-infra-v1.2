@@ -38,7 +38,7 @@ export function AtivoCard({
             <p className="text-gray-700 text-sm">{description}</p>
             <button
                 onClick={onAccessClick}
-                className="mt-3 bg-gradient-to-r from-blue-600 to-purple-500 text-white rounded-md py-2 px-4 font-semibold hover:from-blue-700"
+                className="mt-3 bg-gradient-to-r from-blue-600 to-purple-500 text-white rounded-md py-2 px-4 font-semibold hover:from-blue-700 cursor-pointer"
             >
                 Acessar Sistema EC Infra
             </button>

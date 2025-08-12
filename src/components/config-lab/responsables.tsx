@@ -32,7 +32,7 @@ export default function ResponsaveisTecnicos() {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 mt-4">
             <label className="mb-1 block text-sm font-medium text-gray-700">Responsável Técnico</label>
             <input type="hidden" name="responsables" value={JSON.stringify(responsaveis)} />
             {responsaveis.map((responsavel, index) => (
@@ -41,16 +41,21 @@ export default function ResponsaveisTecnicos() {
                         value={responsavel.name}
                         onChange={(e) => handleChange(index, "name", e.target.value)}
                         placeholder="Nome"
+                        className="bg-white"
                     />
                     <Input
                         value={responsavel.graduation}
                         onChange={(e) => handleChange(index, "graduation", e.target.value)}
                         placeholder="Formação"
+                        className="bg-white"
+
                     />
                     <Input
                         value={responsavel.register}
                         onChange={(e) => handleChange(index, "register", e.target.value)}
                         placeholder="Número de Registro"
+                        className="bg-white"
+                
                     />
 
                     {index === 0 && (
