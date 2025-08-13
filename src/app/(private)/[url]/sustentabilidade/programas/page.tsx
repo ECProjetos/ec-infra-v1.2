@@ -146,9 +146,13 @@ export default function SustentabilidadeDashboard() {
                 </div>
             </div>
             {renderFormByCategory(formCategory)}
-            {Object.entries(dynamicFormData).map(([key, value]) => (
-                <input type="hidden" name={key} value={String(value)} key={key} />
-            ))}
+            {Object.entries(dynamicFormData).map(([key, value]) => {
+                let stringifiedValue = String(value);
+                if (key === 'points_location' || key === 'periodicity_parameters') {
+                    stringifiedValue = JSON.stringify(value);
+                }
+                return <input type="hidden" name={key} value={stringifiedValue} key={key} />;
+            })}
             <div className="flex justify-end">
                 <Button className="bg-blue-600 mt-5 hover:bg-blue-700" type="submit">
                     Salvar

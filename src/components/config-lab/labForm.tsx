@@ -18,7 +18,7 @@ export function LabForm() {
         { success: false }
 
     );
-    const ativoId = useAtivoStore().ativo?.id
+    const ativoId = useAtivoStore().ativo?.id ?? ""
 
     useEffect(() => {
         if (state.success) {
