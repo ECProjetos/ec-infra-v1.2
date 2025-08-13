@@ -31,7 +31,7 @@ export function LabForm() {
 
     return (
         <form action={formAction}>
-            <div className="rounded-md bg-gray-50 border-l-4 border-blue-600 p-3 md:p-5">
+            <div className="rounded-md bg-gray-50 border-l-4 border-blue-600 p-3 md:p-5 min-h-screen">
                 <h1 className="text-2xl font-bold py-2">Novo laboratório</h1>
 
                 {typeof state.error === 'string' && (

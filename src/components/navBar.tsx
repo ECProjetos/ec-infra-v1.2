@@ -6,7 +6,6 @@ import 'animate.css';
 import { CadastroTerminalPortuarioDialog } from "./config-assets/addAsset";
 import { ConfigurarUsuarios } from "./config-users/usersPermissions";
 import { logoutClient } from "@/app/(auth)/logoutClient";
-import { ConfigurarLaboratorios } from "./config-lab/labConfig";
 
 export function AppNav() {
     return (
@@ -40,7 +39,6 @@ export function AppNav() {
 
                 <ConfigurarUsuarios />
 
-                <ConfigurarLaboratorios />
 
                 <p className="text-red-500 cursor-pointer" onClick={logoutClient}>Sair</p>
             </div>

@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,23 +12,36 @@ import { CreatePermissionGroup } from "@/app/actions/permissoes/createGroups";
 
 // Tipagem para grupo
 interface GroupType {
-
-    group_id?: string,
+    group_id?: string;
     nome: string;
     permissoes: string[];
 }
 
-const permissoes = [
+// -------- Helpers --------
+const normalizePerm = (p: string) => p.replace(/^\/+/, "");
+const normalizePermArray = (arr: string[]) => arr.map(normalizePerm);
+
+// --------- Opções de Permissões (padronizadas e com nested) ----------
+const permissoesOptions = [
     { label: "Dashboard", value: "dashboard" },
     { label: "Operações", value: "operacoes" },
     { label: "Financeiro", value: "financeiro" },
     { label: "Inteligência de Mercado", value: "mercado" },
     { label: "Gestão Estratégica", value: "estrategica" },
     { label: "Gestão de Infraestrutura", value: "infraestrutura" },
+
+    // Sustentabilidade (grupo e filhos)
+    { label: "Sustentabilidade (grupo)", value: "sustentabilidade" },
     { label: "Dashboard de Sustentabilidade", value: "sustentabilidade/dashboard" },
-    { label: "PBA do porto", value: "sustentabilidade/pba-do-porto" },
-    { label: "Licensas Ambientais", value: "sustentabilidade/licensas" },
+    { label: "Laboratórios", value: "sustentabilidade/laboratorios" },
+
+    // Licenças Ambientais (grupo e filhos)
+    { label: "Licenças Ambientais (grupo)", value: "sustentabilidade/licensas" },
+    { label: "Licenças Ambientais • Dashboard", value: "sustentabilidade/licensas/dashboard" },
+    { label: "Licenças Ambientais • Coleta de Dados", value: "sustentabilidade/licensas/coleta-dados" },
+
     { label: "Cadastro P&P", value: "sustentabilidade/criar-programa" },
+    { label: "PBA do Porto", value: "sustentabilidade/pba-do-porto" },
     { label: "Geração de relatórios", value: "sustentabilidade/gerar-relatorios" },
 ];
 
@@ -39,47 +53,82 @@ export default function GroupRepeater({ name }: { name: string }) {
             prevState: { success: boolean; error: string },
             formData: FormData
         ) => {
-            // Pegando e parseando os dados
-            const raw = formData.get(name);
-            const allGroups: GroupType[] = raw ? JSON.parse(raw as string) : [];
+            try {
+                // Pega e parseia todos os grupos do hidden input
+                const raw = formData.get(name);
+                const allGroups: GroupType[] = raw ? JSON.parse(raw as string) : [];
 
-            // Filtra apenas os novos (sem ID)
-            const newGroups = allGroups.filter(g => !g.group_id);
+                // Garante normalização antes de enviar
+                const normalizedGroups = allGroups.map((g) => ({
+                    ...g,
+                    permissoes: normalizePermArray(g.permissoes),
+                }));
 
-            // Atualiza o formData com os grupos novos
-            formData.set(name, JSON.stringify(newGroups));
+                // Filtra apenas os novos (sem ID)
+                const newGroups = normalizedGroups.filter((g) => !g.group_id);
 
-            // Chama o backend com apenas os novos
-            const result = await CreatePermissionGroup(formData);
+                // Atualiza o formData com os grupos novos normalizados
+                formData.set(name, JSON.stringify(newGroups));
 
-            return {
-                success: result.success,
-                error: result.error ?? "",
-            };
+                // Chama o backend com apenas os novos
+                const result = await CreatePermissionGroup(formData);
+
+                return {
+                    success: result.success,
+                    error: result.error ?? "",
+                };
+            } catch (e: any) {
+                return {
+                    success: false,
+                    error: e?.message ?? "Erro desconhecido ao salvar grupos.",
+                };
+            }
         },
         initialState
     );
 
-    const [group, setGroup] = useState<GroupType[]>([]);
+    const [group, setGroup] = useState<GroupType[]>([{ nome: "", permissoes: [] }]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [loadError, setLoadError] = useState<string>("");
+
     const asset = useAtivoStore();
     const assetId = asset.ativo?.id;
 
+    // Carrega grupos existentes do ativo e normaliza as permissões
     useEffect(() => {
         const fetchGroups = async () => {
             if (!assetId) return;
-            const groups = await getGroups({ asset_id: assetId });
-            setGroup(groups.length > 0 ? groups : [{ nome: "", permissoes: [] }]);
+            setLoading(true);
+            setLoadError("");
+            try {
+                const groups = await getGroups({ asset_id: assetId });
+
+                if (groups.length > 0) {
+                    setGroup(
+                        groups.map((g) => ({
+                            ...g,
+                            permissoes: normalizePermArray(g.permissoes ?? []),
+                        }))
+                    );
+                } else {
+                    setGroup([{ nome: "", permissoes: [] }]);
+                }
+            } catch (e: any) {
+                setLoadError(e?.message ?? "Não foi possível carregar os grupos.");
+                setGroup([{ nome: "", permissoes: [] }]);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchGroups();
     }, [assetId]);
 
     const handleAdd = () => {
-        setGroup([...group, { nome: "", permissoes: [] }]);
+        setGroup((prev) => [...prev, { nome: "", permissoes: [] }]);
     };
 
     const handleRemove = (index: number) => {
-        if (group.length === 1) return;
-        setGroup(group.filter((_, idx) => idx !== index));
+        setGroup((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
     };
 
     const handleChange = <K extends keyof GroupType>(
@@ -88,29 +137,49 @@ export default function GroupRepeater({ name }: { name: string }) {
         value: GroupType[K]
     ) => {
         setGroup((prev) =>
-            prev.map((item, idx) =>
-                idx === index ? { ...item, [field]: value } : item
-            )
+            prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item))
         );
     };
 
-    const isFormValid = group.length > 0 && group.every(g => g.nome.trim() !== "" && g.permissoes.length > 0);
+    // Validação básica
+    const isFormValid =
+        group.length > 0 &&
+        group.every(
+            (g) => g.nome.trim() !== "" && (g.permissoes?.length ?? 0) > 0
+        );
+
+    // Valor serializado (já normalizado) para enviar no hidden
+    const serialized = useMemo(
+        () =>
+            JSON.stringify(
+                group.map((g) => ({
+                    ...g,
+                    permissoes: normalizePermArray(g.permissoes ?? []),
+                }))
+            ),
+        [group]
+    );
 
     return (
         <form className="space-y-8 p-4" action={formActionGroup}>
             <input type="hidden" name="asset_id" value={assetId ?? ""} />
-            <input
-                type="hidden"
-                name={name}
-                value={JSON.stringify(group)}
-                readOnly
-            />
+            <input type="hidden" name={name} value={serialized} readOnly />
 
-            {/* Feedback de sucesso/erro */}
-            {state.error && (
-                <div className="text-red-600 bg-red-100 p-3 rounded">
-                    {state.error}
+            {/* Feedback de loading/erro de carregamento */}
+            {loading && (
+                <div className="text-sm text-zinc-600 bg-zinc-100 p-3 rounded">
+                    Carregando grupos...
                 </div>
+            )}
+            {loadError && (
+                <div className="text-red-600 bg-red-100 p-3 rounded">
+                    {loadError}
+                </div>
+            )}
+
+            {/* Feedback de sucesso/erro ao salvar */}
+            {state.error && (
+                <div className="text-red-600 bg-red-100 p-3 rounded">{state.error}</div>
             )}
             {state.success && (
                 <div className="text-green-600 bg-green-100 p-3 rounded">
@@ -131,7 +200,7 @@ export default function GroupRepeater({ name }: { name: string }) {
 
             {group.map((item, index) => (
                 <div
-                    key={index}
+                    key={item.group_id ?? index}
                     className="border-l-4 border-blue-600 bg-gray-50 p-4 rounded-md mb-3 space-y-4"
                 >
                     <h4 className="text-lg font-semibold mb-2">Grupo {index + 1}</h4>
@@ -142,18 +211,16 @@ export default function GroupRepeater({ name }: { name: string }) {
                             <Input
                                 className="w-full bg-white"
                                 value={item.nome}
-                                onChange={(e) =>
-                                    handleChange(index, "nome", e.target.value)
-                                }
+                                onChange={(e) => handleChange(index, "nome", e.target.value)}
                             />
                         </div>
                         <div>
                             <Label className="mb-1 block">Permissões</Label>
                             <MultiSelect
-                                options={permissoes}
+                                options={permissoesOptions}
                                 value={item.permissoes}
                                 onChange={(val) =>
-                                    handleChange(index, "permissoes", val)
+                                    handleChange(index, "permissoes", normalizePermArray(val))
                                 }
                                 placeholder="Selecione permissões..."
                                 className="w-full"
@@ -178,7 +245,7 @@ export default function GroupRepeater({ name }: { name: string }) {
             <Button
                 type="submit"
                 className="bg-blue-600 text-white hover:bg-blue-700"
-                disabled={!isFormValid}
+                disabled={!isFormValid || loading}
             >
                 Salvar Configurações
             </Button>
