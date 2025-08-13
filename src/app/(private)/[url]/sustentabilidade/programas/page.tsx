@@ -1,18 +1,48 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { ProgramaQag } from "@/components/programas/qag";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { GetLicenses } from "@/app/actions/licensas/getLicenses";
 import { useAtivoStore } from "@/stores/useAtivoStore";
 import { LicenseSchemaArrayType, LicenseSchemaType } from "@/app/types/licensas/license";
+import { CreateProgram } from "@/app/actions/programas/createPrograms";
+import { toast } from "sonner";
+
+const initialState = { success: false, error: null as string | null };
+
 
 export default function SustentabilidadeDashboard() {
+    const [state, formAction] = useActionState(
+        async (prevState: { success: boolean; error: string | null }, formData: FormData) => {
+            return await CreateProgram(formData);
+        },
+        initialState
+    );
+
+    useEffect(() => {
+        if (state.success) {
+            toast.success("Ativo cadastrado com sucesso!");
+        }
+        if (state.error) {
+            toast.error(`Erro ao cadastrar ativo: ${state.error}`);
+        }
+    }, [state]);
+
     const [formCategory, setFormCategory] = useState('');
     const [licenses, setLicenses] = useState<LicenseSchemaArrayType>();
-    const ativoId = useAtivoStore().ativo?.id
+    const ativoId = useAtivoStore().ativo?.id ?? ""
+    console.log(ativoId)
     const [selectedLicense, setLicense] = useState<LicenseSchemaType>();
+    const [selectedLicenseId, setLicenseId] = useState('');
+    const [dynamicFormData, setDynamicFormData] = useState<any>({});
+    console.log(dynamicFormData)
     const programs = selectedLicense?.programs
+
+    const handleDynamicFormChange = (data: any) => {
+        setDynamicFormData(data);
+    };
 
 
     function handleTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -31,16 +61,16 @@ export default function SustentabilidadeDashboard() {
     function renderFormByCategory(category: string) {
         switch (category) {
             case 'qag':
-                return <ProgramaQag />;
+                return <ProgramaQag onFormChange={handleDynamicFormChange} />;
             default:
                 return null;
         }
     }
 
     return (
-        <form className="px-15 py-10 ">
+        <form className="px-15 py-10 " action={formAction}>
             <input type="hidden" name="asset_id" value={ativoId} />
-            <input type="hiden" name="license_id" value={selectedLicense?.id} />
+            <input type="hidden" name="license_id" value={selectedLicenseId} />
             <div className="mb-5">
                 <h1 className="font-bold text-2xl">Cadastro de Planos e Programas</h1>
                 <p className="py-2 text-gray-600">Interface dinâmica e completa para criação de P&P</p>
@@ -50,6 +80,7 @@ export default function SustentabilidadeDashboard() {
                     className="bg-white p-2 border-1 rounded-md"
                     onChange={e => {
                         const selectedId = e.target.value;
+                        setLicenseId(selectedId)
                         const selectedLicense = licenses?.find(l => l.id === selectedId);
                         setLicense(selectedLicense);
                     }}
@@ -115,6 +146,9 @@ export default function SustentabilidadeDashboard() {
                 </div>
             </div>
             {renderFormByCategory(formCategory)}
+            {Object.entries(dynamicFormData).map(([key, value]) => (
+                <input type="hidden" name={key} value={String(value)} key={key} />
+            ))}
             <div className="flex justify-end">
                 <Button className="bg-blue-600 mt-5 hover:bg-blue-700" type="submit">
                     Salvar
