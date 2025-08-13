@@ -7,7 +7,7 @@ import { useActionState, useEffect, useState } from "react";
 import { GetLicenses } from "@/app/actions/licensas/getLicenses";
 import { useAtivoStore } from "@/stores/useAtivoStore";
 import { LicenseSchemaArrayType, LicenseSchemaType } from "@/app/types/licensas/license";
-import { CreateProgram } from "@/app/actions/programas/createPrograms";
+import { CreateProgram } from "@/app/actions/programas/qag/createQagProgram";
 import { toast } from "sonner";
 
 const initialState = { success: false, error: null as string | null };
@@ -70,6 +70,7 @@ export default function SustentabilidadeDashboard() {
     return (
         <form className="px-15 py-10 " action={formAction}>
             <input type="hidden" name="asset_id" value={ativoId} />
+            <input type="hidden" name="program_category" value={formCategory} />
             <input type="hidden" name="license_id" value={selectedLicenseId} />
             <div className="mb-5">
                 <h1 className="font-bold text-2xl">Cadastro de Planos e Programas</h1>

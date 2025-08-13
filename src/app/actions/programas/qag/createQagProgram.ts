@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ProgramSchema } from "@/app/types/programas/program";
+import { ProgramSchema } from "@/app/types/programas/qag";
 import { createClient } from "@/utils/supabase/client";
 
 export async function CreateProgram(formData: FormData): Promise<any> {

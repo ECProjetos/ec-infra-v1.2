@@ -30,6 +30,7 @@ export const ProgramSchema = z.object({
     id: z.string().optional(),
     asset_id: z.string(),
     license_id: z.string(),
+    program_category: z.string(),
     name: z.string(),
     code: z.string(),
     description: z.string(),
@@ -41,4 +42,9 @@ export const ProgramSchema = z.object({
     points_location: z.array(PointsLocationSchema),
     periodicity_parameters: z.array(PeriodicitySchema),
 });
+
+export const ProgramArraySchema = z.array(ProgramSchema)
+
+export type ProgramArrayType = z.infer<typeof ProgramArraySchema>
+
 export type ProgramInput = z.infer<typeof ProgramSchema>;
