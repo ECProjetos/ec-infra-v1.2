@@ -2,6 +2,7 @@ import { z } from "zod";
 
 
 export const ResponsaveisSchema = z.object({
+    id: z.string().optional(),
     name: z.string(),
     graduation: z.string(),
     register: z.string(),
@@ -27,3 +28,4 @@ export const LaboratorioSchema = z.object({
 
 
 export type LaboratorioType = z.infer<typeof LaboratorioSchema>
+export type ResponsablesType = z.infer<typeof ResponsaveisSchema>

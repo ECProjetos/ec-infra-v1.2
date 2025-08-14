@@ -35,7 +35,7 @@ export default function SelecionarAtivo() {
 
     function handleClick(ativoUrl: string) {
         localStorage.setItem('selectedAtivo', ativoUrl);
-        router.push(`/${ativoUrl}/dashboard`);
+        router.push(`/${ativoUrl}/bem-vindo`);
     }
 
     return (

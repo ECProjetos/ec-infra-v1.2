@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { ProgramaQag } from "@/components/programas/qag";
+import { ProgramaQag } from "@/components/programas/qag/progQag";
 import { Button } from "@/components/ui/button";
 import { useActionState, useEffect, useState } from "react";
 import { GetLicenses } from "@/app/actions/licensas/getLicenses";
