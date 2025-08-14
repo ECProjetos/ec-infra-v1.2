@@ -118,7 +118,7 @@ const items: NavItem[] = [
             },
             { title: "Cadastro P&P", url: "/sustentabilidade/programas", perm: "sustentabilidade/criar-programa" },
             { title: "PBA Do Porto", url: "/sustentabilidade/pba-do-porto", perm: "sustentabilidade/pba-do-porto" },
-            { title: "Geração de Relatórios", url: "/sustentabilidade/gerar-relatorios", perm: "sustentabilidade/gerar-relatorios" },
+            { title: "Geração de Relatórios", url: "/sustentabilidade/relatorios", perm: "sustentabilidade/gerar-relatorios" },
         ],
     },
     { title: "Gestão da Infraestrutura", url: "/infraestrutura", icon: Users, perm: "infraestrutura" },

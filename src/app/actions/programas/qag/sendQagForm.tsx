@@ -1,94 +1,73 @@
+// app/actions/programas/qag/sendQagForm.ts
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { CreateFormQualidadeDaAguaSuperficial } from "@/app/types/programas/qag_form";
+import { revalidatePath } from "next/cache";
 
-export async function uploadFiles(
-    files: File[] | undefined,
-    folder: string
-): Promise<string[]> {
-    const supabase = await createClient();
-    if (!files) return [];
+type SuperficialWaterQualityFormPayload = {
+    user_id: string | null;
+    ativo_id: string | null;
+    campanha_de_coleta: string | null;
+    periodicidade_da_analise: string | null;
+    nome_laboratorio: string | null;
+    razao_social_laboratorio: string | null;
+    cnpj_laboratorio: string | null;
+    endereco_laboratorio: string | null;
+    responsavel_tecnico: string | null;
+    email: string | null;
+    contato: string | null;
+    resultados: string | null;
+    registros_fotograficos_sondas: string[];
+    registros_fotograficos_amostradores: string[];
+    registros_fotograficos_caixas_termicas: string[];
+    registros_fotograficos_outros: string[] | null;
+    laudos: string[];
+};
 
-    const uploads = await Promise.all(
-        files.map(async (file) => {
-            const path = `${folder}/${Date.now()}_${file.name}`;
-
-            // Upload
-            const { error: upErr } = await supabase.storage
-                .from("qualidade-agua-superficial")
-                .upload(path, file, { cacheControl: "3600", upsert: false });
-            if (upErr) throw upErr;
-
-            // Get public URL
-            const { data } = supabase.storage
-                .from("qualidade-agua-superficial")
-                .getPublicUrl(path);
-
-            // data.publicUrl sempre existe
-            return data.publicUrl;
-        })
-    );
-
-    return uploads;
-}
-
-export async function createQualidadeAguaSuperficial(
-    form: CreateFormQualidadeDaAguaSuperficial
-) {
+export async function createQualidadeAguaSuperficial(formData: FormData) {
+    console.log("ENTROUUUUUUUUUUUUUUUUUUUUU")
     const supabase = await createClient();
 
-    const laudoUrls = await uploadFiles(
-        form.laudos,
-        `laudos/${form.user_id}`
-    );
-    const registroFotograficoSondasUrls = await uploadFiles(
-        form.registros_fotograficos_sondas,
-        `sondas/${form.user_id}`
-    );
-    const registroFotograficoAmostradoresUrls = await uploadFiles(
-        form.registros_fotograficos_amostradores,
-        `amostradores/${form.user_id}`
-    );
-    const registroFotograficoCaixasTermicasUrls = await uploadFiles(
-        form.registros_fotograficos_caixas_termicas,
-        `caixas_termicas/${form.user_id}`
-    );
-    const registroFotograficoOutrosUrls = form.registros_fotograficos_outros
-        ? await uploadFiles(
-            form.registros_fotograficos_outros,
-            `outros/${form.user_id}`
-        )
-        : null;
-
-    const payload = {
-        user_id: form.user_id,
-        ativo_id: form.ativo_id,
-        campanha_de_coleta: form.campanha_de_coleta,
-        periodicidade_da_analise: form.periodicidade_da_analise,
-        nome_laboratorio: form.nome_laboratorio,
-        razao_social_laboratorio: form.razao_social_laboratorio,
-        cnpj_laboratorio: form.cnpj_laboratorio,
-        endereco_laboratorio: form.endereco_laboratorio,
-        responsavel_tecnico: form.responsavel_tecnico,
-        email: form.email,
-        contato: form.contato,
-        resultados: form.resultados,
-        registros_fotograficos_sondas: registroFotograficoSondasUrls,
-        registros_fotograficos_amostradores: registroFotograficoAmostradoresUrls,
-        registros_fotograficos_caixas_termicas: registroFotograficoCaixasTermicasUrls,
-        registros_fotograficos_outros: registroFotograficoOutrosUrls,
-        laudos: laudoUrls,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const parseJSON = <T = any>(name: string): T | null => {
+        const raw = formData.get(name) as string | null;
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch { return null; }
     };
 
-    const { data, error } = await supabase
+    const payload: SuperficialWaterQualityFormPayload = {
+        user_id: formData.get("user_id") as string | null,
+        ativo_id: formData.get("ativo_id") as string | null,
+        campanha_de_coleta: formData.get("campanha_de_coleta") as string | null,
+        periodicidade_da_analise: formData.get("periodicidade_da_analise") as string | null,
+        nome_laboratorio: formData.get("nome_laboratorio") as string | null,
+        razao_social_laboratorio: formData.get("razao_social_laboratorio") as string | null,
+        cnpj_laboratorio: formData.get("cnpj_laboratorio") as string | null,
+        endereco_laboratorio: formData.get("endereco_laboratorio") as string | null,
+        responsavel_tecnico: formData.get("responsavel_tecnico") as string | null,
+        email: formData.get("email") as string | null,
+        contato: formData.get("contato") as string | null,
+
+        // CSV processado no client (salvar como JSON/text)
+        resultados: formData.get("resultados_json") as string | null,
+
+        // URLs geradas no client
+        registros_fotograficos_sondas: parseJSON<string[]>("registros_fotograficos_sondas") ?? [],
+        registros_fotograficos_amostradores: parseJSON<string[]>("registros_fotograficos_amostradores") ?? [],
+        registros_fotograficos_caixas_termicas: parseJSON<string[]>("registros_fotograficos_caixas_termicas") ?? [],
+        registros_fotograficos_outros: parseJSON<string[]>("registros_fotograficos_outros"),
+        laudos: parseJSON<string[]>("laudos") ?? [],
+    };
+
+    const { error } = await supabase
         .from("superficial_water_quality_form")
         .insert([payload]);
 
     if (error) {
         console.error("Erro ao inserir formulário:", error);
-        throw error;
+        return { success: false, error: error.message };
     }
-    return data;
 
+    revalidatePath("/programas/qag");
+    return { success: true, error: null };
 }
