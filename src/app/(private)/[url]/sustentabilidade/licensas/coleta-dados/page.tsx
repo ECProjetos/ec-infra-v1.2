@@ -42,7 +42,7 @@ export default function ColetaPage() {
 
 
     return (
-        <div className="px-15 py-10">
+        <div className="px-15 py-10 ">
             <div className="bg-gray-50 rounded-md border-l-4 border-blue-600 shadow-md p-6">
                 <label className="m-3 font-semibold">Selecione a Licensa:</label>
                 <select
@@ -50,6 +50,7 @@ export default function ColetaPage() {
                     onChange={e => {
                         const selectedId = e.target.value;
                         setLicenseId(selectedId)
+                        setProgramCategory('')
                     }}
                 >
                     <option value="">Selecione a Licensa</option>

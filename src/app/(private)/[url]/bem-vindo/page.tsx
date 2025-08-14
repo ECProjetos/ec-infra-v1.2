@@ -17,7 +17,7 @@ const cards: CardItem[] = [
     { title: "Mercado", desc: "Inteligência de mercado e benchmarks.", icon: "🌐", perm: "mercado" },
     { title: "Estratégia", desc: "Metas, OKRs e iniciativas-chave.", icon: "🧩", perm: "estrategica" },
     { title: "Infraestrutura", desc: "Patrimônio, manutenção e disponibilidade.", icon: "🏗️", perm: "infraestrutura" },
-    { title: "Sustentabilidade", desc: "Programas, medições e IDA ANTAQ.", icon: "🌱", perm: "sustentabilidade" },
+    { title: "Sustentabilidade", desc: "Programas, medições e IDA ANTAQ.", icon: "🌱", perm: "sustentabilidade/dashboard" },
 ];
 
 export default function BemVindoPage() {
