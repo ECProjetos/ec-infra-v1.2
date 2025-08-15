@@ -163,17 +163,14 @@ export function FormQag() {
                 <input type="hidden" name="registros_fotograficos_caixas_termicas" value={JSON.stringify(caixasUrls)} />
                 <input type="hidden" name="registros_fotograficos_outros" value={JSON.stringify(outrosUrls)} />
                 <input type="hidden" name="laudos" value={JSON.stringify(laudosUrls)} />
-
-                <h1 className="font-bold text-md bg-gray-50 border-l-4 border-blue-600 rounded-md p-3 shadow-md text-center">
-                    Tipo do Programa: Qualidade Superficial da Água
-                </h1>
-
                 <div className="bg-gray-50 border-l-4 border-blue-600 rounded-md p-3 shadow-md mt-3">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 px-6 md:px-20">
+                    <h1 className="font-semibold text-xl text-center mb-5">Tipo do Programa: Qualidade Superficial da Água</h1>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 py-3 gap-6 px-6 md:px-10">
                         <div className="flex flex-col">
                             <label className="font-semibold">Campanha de Coleta</label>
                             <input
-                                className="bg-white p-2 mt-2 w-full rounded border-b border-blue-600"
+                                className="bg-white p-2 mt-2 w-full rounded border-1"
                                 type="date"
                                 name="campanha_de_coleta"
                                 required
@@ -182,20 +179,24 @@ export function FormQag() {
 
                         <div className="flex flex-col">
                             <label className="font-semibold">Periodicidade da Análise</label>
-                            <div className="mt-2 bg-white border-b border-blue-600 rounded-md flex flex-wrap gap-4 p-2">
+                            <select
+                                className="mt-2 bg-white p-2 border-1 rounded-md"
+                                name="periodicidade_da_analise"
+                                required
+                            >
+                                <option value="">Selecione a periodicidade</option>
                                 {["mensal", "trimestral", "semestral", "anual"].map((p) => (
-                                    <label key={p} className="inline-flex items-center gap-2">
-                                        <input type="radio" name="periodicidade_da_analise" value={p} required />
+                                    <option key={p} value={p}>
                                         {p[0].toUpperCase() + p.slice(1)}
-                                    </label>
+                                    </option>
                                 ))}
-                            </div>
+                            </select>
                         </div>
 
                         <div className="flex flex-col">
                             <label className="font-semibold text-center md:text-left">Laboratório</label>
                             <select
-                                className="mt-2 bg-white p-2 border-b border-blue-600 rounded-md"
+                                className="mt-2 bg-white p-2 border-1 rounded-md"
                                 value={selectedLabId}
                                 onChange={(e) => setSelectedLabId(e.target.value)}
                                 required
@@ -211,7 +212,7 @@ export function FormQag() {
 
                         <div className="flex flex-col">
                             <label className="font-semibold text-center md:text-left">Responsável Técnico</label>
-                            <select className="mt-2 bg-white p-2 border-b border-blue-600 rounded-md" name="responsavel_tecnico" required>
+                            <select className="mt-2 bg-white p-2 border-1 rounded-md" name="responsavel_tecnico" required>
                                 <option value="">Selecione o Responsável Técnico</option>
                                 {responsables.map((resp) => (
                                     <option key={resp.id ?? resp.name} value={resp.id ?? ""}>
@@ -227,7 +228,7 @@ export function FormQag() {
                     <label className="font-semibold">Resultados (CSV QAG)</label>
                     {/* sem name → não vai no body */}
                     <input
-                        className="bg-white border-b border-blue-600 rounded-md p-2"
+                        className="bg-white border-1 rounded-md p-2"
                         type="file"
                         accept=".csv"
                         onChange={handleResultadosChange}
@@ -241,7 +242,7 @@ export function FormQag() {
 
                     <label className="font-semibold">Registros Fotográficos Sondas (.png)</label>
                     <input
-                        className="bg-white border-b border-blue-600 rounded-md p-2"
+                        className="bg-white border-1 rounded-md p-2"
                         type="file"
                         accept=".png"
                         multiple
@@ -251,7 +252,7 @@ export function FormQag() {
 
                     <label className="font-semibold">Registros Fotográficos Amostradores (.png)</label>
                     <input
-                        className="bg-white border-b border-blue-600 rounded-md p-2"
+                        className="bg-white border-1 rounded-md p-2"
                         type="file"
                         accept=".png"
                         multiple
@@ -261,7 +262,7 @@ export function FormQag() {
 
                     <label className="font-semibold">Registros Fotográficos Caixas Térmicas (.png)</label>
                     <input
-                        className="bg-white border-b border-blue-600 rounded-md p-2"
+                        className="bg-white border-1 rounded-md p-2"
                         type="file"
                         accept=".png"
                         multiple
@@ -271,7 +272,7 @@ export function FormQag() {
 
                     <label className="font-semibold">Registros Fotográficos Outros (.png)</label>
                     <input
-                        className="bg-white border-b border-blue-600 rounded-md p-2"
+                        className="bg-white border-1 rounded-md p-2"
                         type="file"
                         accept=".png"
                         multiple
@@ -281,7 +282,7 @@ export function FormQag() {
 
                     <label className="font-semibold">Laudos (.pdf)</label>
                     <input
-                        className="bg-white border-b border-blue-600 rounded-md p-2"
+                        className="bg-white border-1 rounded-md p-2"
                         type="file"
                         accept=".pdf"
                         multiple

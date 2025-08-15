@@ -46,7 +46,7 @@ export default function ColetaPage() {
             <div className="bg-gray-50 rounded-md border-l-4 border-blue-600 shadow-md p-6">
                 <label className="m-3 font-semibold">Selecione a Licensa:</label>
                 <select
-                    className="bg-white p-1 border-b-1 border-blue-600 rounded-md"
+                    className="bg-white p-1 border-1 rounded-md"
                     onChange={e => {
                         const selectedId = e.target.value;
                         setLicenseId(selectedId)
@@ -63,7 +63,7 @@ export default function ColetaPage() {
                 <div>
                     <label className="m-3 font-semibold">Selecione o Programa:</label>
                     <select
-                        className="bg-white p-1 border-b-1 border-blue-600 rounded-md mt-3"
+                        className="bg-white p-1 border-1 rounded-md mt-3"
                         onChange={e => {
                             const selectedProgramCategory = e.target.value;
                             setProgramCategory(selectedProgramCategory)
